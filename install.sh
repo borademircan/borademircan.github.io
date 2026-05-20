@@ -247,8 +247,20 @@ say "→ Writing your config…"
 [ -f data/connections.json ] || echo '{"connections": []}' > data/connections.json
 [ -f data/themes/default-theme.json ] || die "data/themes/default-theme.json missing."
 
-node - <<NODESCRIPT
+# Pass user choices into node via env vars so we can use a *quoted*
+# heredoc — that way bash leaves the JS untouched (no ${...} expansion,
+# no backtick traps) and the JS reads everything from process.env.
+USER_NAME="$USER_NAME" \
+USER_EMAIL="$USER_EMAIL" \
+PAL_NAME="$PAL_NAME" \
+APP_ID="$APP_ID" \
+APP_NAME="$APP_NAME" \
+BASE_URL="$BASE_URL" \
+AI_MODEL="$AI_MODEL" \
+API_KEY="$API_KEY" \
+node - <<'NODESCRIPT'
 const fs = require("fs");
+const e = process.env;
 
 // ─── users.json: update the superadmin entry ─────────────────────────
 {
@@ -256,12 +268,12 @@ const fs = require("fs");
   const j = JSON.parse(fs.readFileSync(path, "utf8"));
   const owner = (j.users || []).find(u => u.superadmin) || j.users[0];
   if (owner) {
-    owner.name = ${JSON.stringify(USER_NAME)};
-    owner.email = ${JSON.stringify(USER_EMAIL)};
+    owner.name = e.USER_NAME;
+    owner.email = e.USER_EMAIL;
     owner.preferences = Object.assign({}, owner.preferences, {
-      theme: ${JSON.stringify(PAL_NAME)},
-      defaultProvider: ${JSON.stringify(APP_ID)},
-      defaultModel: ${JSON.stringify(AI_MODEL)},
+      theme: e.PAL_NAME,
+      defaultProvider: e.APP_ID,
+      defaultModel: e.AI_MODEL,
     });
   }
   fs.writeFileSync(path, JSON.stringify(j, null, 2) + "\n");
@@ -275,7 +287,7 @@ const fs = require("fs");
 // Strip the picker-only id/name/description fields when writing into
 // the runtime default-theme.json so its schema stays minimal.
 {
-  const palette = ${JSON.stringify(PAL_NAME)};
+  const palette = e.PAL_NAME;
   const srcPath = "data/themes/" + palette + "-theme.json";
   const dstPath = "data/themes/default-theme.json";
   if (fs.existsSync(srcPath)) {
@@ -301,36 +313,36 @@ const fs = require("fs");
   // the Connections page Test button works without the user having to
   // configure anything manually.
   let appEndpoints = [];
-  const epPath = "data/apps/" + ${JSON.stringify(APP_ID)} + "/endpoints.json";
+  const epPath = "data/apps/" + e.APP_ID + "/endpoints.json";
   try {
     if (fs.existsSync(epPath)) {
       const ep = JSON.parse(fs.readFileSync(epPath, "utf8"));
-      appEndpoints = (ep.endpoints || []).map((e) => ({
-        id: e.id,
-        label: e.label,
-        method: e.method,
-        path: e.path,
-        mapPath: e.mapPath || "$.data",
-        description: e.description || "",
+      appEndpoints = (ep.endpoints || []).map((ent) => ({
+        id: ent.id,
+        label: ent.label,
+        method: ent.method,
+        path: ent.path,
+        mapPath: ent.mapPath || "$.data",
+        description: ent.description || "",
         queryParams: [],
         headers: [],
-        ...(e.body ? { body: e.body } : {}),
+        ...(ent.body ? { body: ent.body } : {}),
       }));
     }
   } catch (_) { /* ignore — fallback to empty list */ }
 
   const conn = {
     id: "conn-ai-default",
-    name: ${JSON.stringify(APP_NAME)},
-    appId: ${JSON.stringify(APP_ID)},
+    name: e.APP_NAME,
+    appId: e.APP_ID,
     scope: "global",
     config: {
-      baseUrl: ${JSON.stringify(BASE_URL)},
-      model: ${JSON.stringify(AI_MODEL)},
-      ...(${JSON.stringify(API_KEY)} ? { apiKey: ${JSON.stringify(API_KEY)} } : {}),
+      baseUrl: e.BASE_URL,
+      model: e.AI_MODEL,
+      ...(e.API_KEY ? { apiKey: e.API_KEY } : {}),
     },
     settings: {
-      providerId: ${JSON.stringify(APP_ID)},
+      providerId: e.APP_ID,
       endpoints: appEndpoints,
       scope: "global",
     },
