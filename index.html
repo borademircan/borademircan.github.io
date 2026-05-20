@@ -202,6 +202,98 @@
 
   .cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 32px; }
 
+  /* === Hero terminal ====================================================
+   * Tiny mac-style terminal window with syntax-coloured output.
+   * Sits between the badges and the desktop mockup in the hero,
+   * so the page opens with code + visual *before* prose.
+   */
+  .hero-terminal {
+    max-width: 760px;
+    margin: 40px auto 56px;
+    border-radius: 12px;
+    background: #04050a;
+    border: 1px solid rgba(0, 240, 255, 0.18);
+    box-shadow:
+      0 24px 48px -16px rgba(0,0,0,0.6),
+      0 0 28px rgba(0, 240, 255, 0.10),
+      0 0 0 1px rgba(255,255,255,0.03);
+    overflow: hidden;
+    text-align: left;
+  }
+  .hero-terminal__bar {
+    height: 30px;
+    background: #0a0c14;
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    position: relative;
+  }
+  .hero-terminal__dots {
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    background: #ff5f57;
+    box-shadow: 18px 0 0 #febc2e, 36px 0 0 #28c840;
+    flex-shrink: 0;
+  }
+  .hero-terminal__title {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.72rem;
+    color: var(--dim);
+    letter-spacing: 0.05em;
+  }
+  .hero-terminal__body {
+    margin: 0;
+    padding: 18px 22px 22px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.82rem;
+    line-height: 1.75;
+    color: #c8cee0;
+    overflow-x: auto;
+    white-space: pre;
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.012) 0,
+        rgba(255,255,255,0.012) 1px,
+        transparent 1px,
+        transparent 4px
+      );
+  }
+  @media (max-width: 600px) {
+    .hero-terminal__body { font-size: 0.70rem; padding: 14px 16px 18px; line-height: 1.65; }
+  }
+  .hero-terminal .shell    { color: var(--cyan); font-weight: 700; }
+  .hero-terminal .user     { color: var(--magenta); font-weight: 700; }
+  .hero-terminal .ok       { color: var(--lime); }
+  .hero-terminal .arrow    { color: var(--violet); }
+  .hero-terminal .quote    { color: var(--fg); }
+  .hero-terminal .muted    { color: var(--muted); }
+  .hero-terminal .tool     { color: var(--cyan-soft); }
+  .hero-terminal .cursor {
+    display: inline-block;
+    width: 8px;
+    height: 1em;
+    vertical-align: -2px;
+    background: var(--magenta);
+    margin-left: 4px;
+    animation: blink 1.05s steps(2, end) infinite;
+  }
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  /* Hero pitch block (h1 + lead + CTAs) that sits BELOW the mockup */
+  .hero-pitch {
+    max-width: 760px;
+    margin: 80px auto 0;
+    text-align: center;
+  }
+  @media (max-width: 720px) { .hero-pitch { margin-top: 56px; } }
+
   /* === Hero ============================================================*/
   .hero {
     padding: 160px 0 64px;
@@ -299,7 +391,7 @@
 
   /* Hero: single big desktop mockup variant */
   .hero-shots-single {
-    margin-top: 80px;
+    margin-top: 24px;
     position: relative;
   }
   .hero-shots-single::before {
@@ -1162,16 +1254,25 @@
       <span class="hero-badge open">Open · MIT</span>
     </div>
 
-    <h1>A new level of communication with AI — <em>three participants, one loop.</em></h1>
-    <p class="lead" style="margin: 0 auto;">
-      Mira is a conversational AI surface built on two open protocols. <strong style="color:#e5e9f2;">Model Interface Protocol (MIP)</strong> describes the *interface*. <strong style="color:#e5e9f2;">Model Context Protocol (MCP)</strong> exposes the *tools*. Together they mean <strong style="color: var(--amber);">any tool-calling LLM can drive Mira</strong> — no agent framework, no orchestration. Claude Haiku, Gemini Flash, GPT-mini, or a local 8B open model is enough. Often *better*.
-    </p>
+    <!-- Terminal: live proof before any prose -->
+    <div class="hero-terminal" aria-label="A short terminal session showing Mira install + a sample prompt">
+      <div class="hero-terminal__bar">
+        <span class="hero-terminal__dots" aria-hidden="true"></span>
+        <span class="hero-terminal__title">~/mira</span>
+      </div>
+<pre class="hero-terminal__body"><span class="shell">$</span> git clone https://github.com/borademircan/mip
+<span class="shell">$</span> pnpm install && pnpm dev
+<span class="ok">✓</span> ready · <span class="tool">http://localhost:5173</span>
 
-    <div class="cta-row" style="justify-content: center;">
-      <a class="btn btn-primary" href="https://github.com/borademircan/mip">Explore the protocol →</a>
-      <a class="btn btn-ghost" href="#story">Read the story</a>
+<span class="user">›</span> <span class="quote">"build me a real-user-monitoring page from my access logs"</span>
+  <span class="ok">✓</span> <span class="tool">mip_inject_widget</span> · kpi       · <span class="muted">request count</span>
+  <span class="ok">✓</span> <span class="tool">mip_inject_widget</span> · lineChart · <span class="muted">latency p95 over time</span>
+  <span class="ok">✓</span> <span class="tool">mip_inject_widget</span> · pieChart  · <span class="muted">browser breakdown</span>
+  <span class="ok">✓</span> <span class="tool">mip_inject_widget</span> · table     · <span class="muted">slow routes</span>
+<span class="user">›</span><span class="cursor" aria-hidden="true"></span></pre>
     </div>
 
+    <!-- Big desktop mockup -->
     <div class="hero-shots-single">
       <div class="mockup mockup--desktop">
         <div class="mockup__frame">
@@ -1188,6 +1289,19 @@
       <p class="mockup-caption">
         A full Mira dashboard, <strong>built end-to-end in a single conversation</strong> — widgets, charts, tables, KPIs, all bound to live data. One chat turn, every layer of the interface.
       </p>
+    </div>
+
+    <!-- Pitch moved BELOW the mockup -->
+    <div class="hero-pitch">
+      <h1>A new level of communication with AI — <em>three participants, one loop.</em></h1>
+      <p class="lead" style="margin: 0 auto;">
+        Mira is a conversational AI surface built on two open protocols. <strong style="color:#e5e9f2;">Model Interface Protocol (MIP)</strong> describes the *interface*. <strong style="color:#e5e9f2;">Model Context Protocol (MCP)</strong> exposes the *tools*. Together they mean <strong style="color: var(--amber);">any tool-calling LLM can drive Mira</strong> — no agent framework, no orchestration. Claude Haiku, Gemini Flash, GPT-mini, or a local 8B open model is enough. Often *better*.
+      </p>
+
+      <div class="cta-row" style="justify-content: center; margin-top: 36px;">
+        <a class="btn btn-primary" href="https://github.com/borademircan/mip">Explore the protocol →</a>
+        <a class="btn btn-ghost" href="#story">Read the story</a>
+      </div>
     </div>
   </div>
 </section>
