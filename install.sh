@@ -166,12 +166,20 @@ printf "    4) %sMagenta%s  bold, vivid  · brand, marketing\n" "$C_MAG" "$C_RES
 printf "    5) %sSlate%s    neutral grey · enterprise, ops\n" "$C_DIM" "$C_RESET"
 ask PALETTE_CHOICE "Palette [1-5]" "1"
 case "$PALETTE_CHOICE" in
-  2) PAL_NAME="emerald"; PAL_PRIMARY="#10b981"; PAL_BG="#f8fafc" ;;
-  3) PAL_NAME="amber";   PAL_PRIMARY="#f59e0b"; PAL_BG="#fffbeb" ;;
-  4) PAL_NAME="magenta"; PAL_PRIMARY="#db2777"; PAL_BG="#fdf4ff" ;;
-  5) PAL_NAME="slate";   PAL_PRIMARY="#475569"; PAL_BG="#f1f5f9" ;;
-  *) PAL_NAME="aurora";  PAL_PRIMARY="#2563eb"; PAL_BG="#f8fafc" ;;
+  2) PAL_NAME="emerald" ;;
+  3) PAL_NAME="amber"   ;;
+  4) PAL_NAME="magenta" ;;
+  5) PAL_NAME="slate"   ;;
+  *) PAL_NAME="aurora"  ;;
 esac
+PAL_FILE="data/themes/${PAL_NAME}-theme.json"
+if [ ! -f "$PAL_FILE" ]; then
+  warn "theme file $PAL_FILE missing — falling back to aurora"
+  PAL_NAME="aurora"
+  PAL_FILE="data/themes/aurora-theme.json"
+fi
+# Pull the primary color out for the final status printout
+PAL_PRIMARY=$(node -e "console.log(JSON.parse(require('fs').readFileSync('$PAL_FILE','utf8')).colors.primary)" 2>/dev/null || echo "")
 ok "palette: $PAL_NAME ($PAL_PRIMARY)"
 
 # 3. preferred AI provider
@@ -260,17 +268,24 @@ const fs = require("fs");
   console.log("  · data/users.json — owner =", owner ? owner.name : "(none)");
 }
 
-// ─── default-theme.json: swap primary color + background ─────────────
+// ─── default-theme.json: copy the chosen preset verbatim ─────────────
+// data/themes/<palette>-theme.json files ship with the full coherent
+// color set (primary, background, surface, text, success, warning,
+// danger), correct mode (dark/light), typography, radius, density.
+// Strip the picker-only id/name/description fields when writing into
+// the runtime default-theme.json so its schema stays minimal.
 {
-  const path = "data/themes/default-theme.json";
-  const t = JSON.parse(fs.readFileSync(path, "utf8"));
-  t.colors = Object.assign({}, t.colors, {
-    primary: ${JSON.stringify(PAL_PRIMARY)},
-    background: ${JSON.stringify(PAL_BG)},
-  });
-  t.paletteName = ${JSON.stringify(PAL_NAME)};
-  fs.writeFileSync(path, JSON.stringify(t, null, 2) + "\n");
-  console.log("  · data/themes/default-theme.json — primary =", t.colors.primary);
+  const palette = ${JSON.stringify(PAL_NAME)};
+  const srcPath = "data/themes/" + palette + "-theme.json";
+  const dstPath = "data/themes/default-theme.json";
+  if (fs.existsSync(srcPath)) {
+    const preset = JSON.parse(fs.readFileSync(srcPath, "utf8"));
+    const { id, name, description, ...rest } = preset;
+    fs.writeFileSync(dstPath, JSON.stringify(rest, null, 2) + "\n");
+    console.log("  · data/themes/default-theme.json — copied from", srcPath, "· mode =", rest.mode);
+  } else {
+    console.log("  · data/themes/default-theme.json — preset", srcPath, "not found, leaving as-is");
+  }
 }
 
 // ─── connections.json: append the AI provider connection ─────────────
