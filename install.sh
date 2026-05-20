@@ -13,7 +13,7 @@
 #     3. Asks four short questions:
 #         - your name (defaults to $USER)
 #         - your email
-#         - color palette (5 presets)
+#         - color palette (10 well-known design-system themes)
 #         - preferred AI provider + model + API key (or local Ollama URL)
 #     4. Writes the answers into the right files:
 #         - data/users.json           (owner name, email, theme preference)
@@ -157,26 +157,39 @@ ask USER_EMAIL "Your email"  ""
 [ -z "$USER_NAME"  ] && USER_NAME="Owner"
 [ -z "$USER_EMAIL" ] && USER_EMAIL="owner@example.com"
 
-# 2. color palette
-printf "\n  %sPick a palette:%s\n" "$C_BOLD" "$C_RESET"
-printf "    1) %sAurora%s   indigo→cyan  · cool, technical (default)\n" "$C_CYAN" "$C_RESET"
-printf "    2) %sEmerald%s  fresh, green · health, growth\n" "$C_LIME" "$C_RESET"
-printf "    3) %sAmber%s    warm, gold   · creative, editorial\n" "$C_AMB" "$C_RESET"
-printf "    4) %sMagenta%s  bold, vivid  · brand, marketing\n" "$C_MAG" "$C_RESET"
-printf "    5) %sSlate%s    neutral grey · enterprise, ops\n" "$C_DIM" "$C_RESET"
-ask PALETTE_CHOICE "Palette [1-5]" "1"
+# 2. color palette — the same 10 design-system themes the in-app picker offers,
+#    so after install the Appearance picker highlights the active one (vs.
+#    showing "Custom"). Mapping lives in data/themes/<id>-theme.json — strings
+#    here must match those filenames.
+printf "\n  %sPick a palette:%s  %s(same 10 themes you'll find in Settings → Appearance)%s\n" "$C_BOLD" "$C_RESET" "$C_DIM" "$C_RESET"
+printf "    1)  %sMira · Dark%s          neon cyan · the Mira default\n"            "$C_CYAN" "$C_RESET"
+printf "    2)  %sLinear · Dark%s        indigo on near-black · calm dev surface\n" "$C_CYAN" "$C_RESET"
+printf "    3)  %sVercel · Dark%s        pure black + white · minimal contrast\n"   "$C_BOLD" "$C_RESET"
+printf "    4)  %sCatppuccin · Mocha%s   pastel purple on warm dark\n"              "$C_MAG"  "$C_RESET"
+printf "    5)  %sTokyo Night%s          soft blue on indigo · editor favorite\n"   "$C_CYAN" "$C_RESET"
+printf "    6)  %sNord · Dark%s          frost cyan on cool slate · Arctic\n"       "$C_CYAN" "$C_RESET"
+printf "    7)  %sDracula%s              purple + pink on slate · classic dev\n"    "$C_MAG"  "$C_RESET"
+printf "    8)  %sOne Dark%s             blue on graphite · balanced, readable\n"   "$C_CYAN" "$C_RESET"
+printf "    9)  %sTailwind · Light%s     blue-500 on slate-50 · crisp modern\n"     "$C_CYAN" "$C_RESET"
+printf "    10) %sSolarized · Light%s    cream paper + deep cyan · the classic\n"   "$C_AMB"  "$C_RESET"
+ask PALETTE_CHOICE "Palette [1-10]" "1"
 case "$PALETTE_CHOICE" in
-  2) PAL_NAME="emerald" ;;
-  3) PAL_NAME="amber"   ;;
-  4) PAL_NAME="magenta" ;;
-  5) PAL_NAME="slate"   ;;
-  *) PAL_NAME="aurora"  ;;
+  2)  PAL_NAME="linear-dark"      ;;
+  3)  PAL_NAME="vercel-dark"      ;;
+  4)  PAL_NAME="catppuccin-mocha" ;;
+  5)  PAL_NAME="tokyo-night"      ;;
+  6)  PAL_NAME="nord-dark"        ;;
+  7)  PAL_NAME="dracula"          ;;
+  8)  PAL_NAME="one-dark"         ;;
+  9)  PAL_NAME="tailwind-light"   ;;
+  10) PAL_NAME="solarized-light"  ;;
+  *)  PAL_NAME="mira-dark"        ;;
 esac
 PAL_FILE="data/themes/${PAL_NAME}-theme.json"
 if [ ! -f "$PAL_FILE" ]; then
-  warn "theme file $PAL_FILE missing — falling back to aurora"
-  PAL_NAME="aurora"
-  PAL_FILE="data/themes/aurora-theme.json"
+  warn "theme file $PAL_FILE missing — falling back to mira-dark"
+  PAL_NAME="mira-dark"
+  PAL_FILE="data/themes/mira-dark-theme.json"
 fi
 # Pull the primary color out for the final status printout
 PAL_PRIMARY=$(node -e "console.log(JSON.parse(require('fs').readFileSync('$PAL_FILE','utf8')).colors.primary)" 2>/dev/null || echo "")
