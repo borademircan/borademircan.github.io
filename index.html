@@ -793,6 +793,97 @@
     font-family: "JetBrains Mono", monospace;
   }
 
+  /* === Small models section (amber accent) ============================*/
+  .simple-section {
+    background:
+      radial-gradient(900px 500px at 50% 0%, rgba(255, 193, 77, 0.06), transparent 65%),
+      linear-gradient(180deg, transparent, rgba(255, 193, 77, 0.03), transparent);
+    border-top: 1px solid rgba(255, 193, 77, 0.12);
+    border-bottom: 1px solid rgba(255, 193, 77, 0.07);
+  }
+  .simple-section .eyebrow {
+    color: var(--amber);
+    border-color: rgba(255, 193, 77, 0.32);
+    background: rgba(255, 193, 77, 0.05);
+  }
+  .simple-section h2 em {
+    background: linear-gradient(135deg, var(--amber), var(--magenta));
+    background-clip: text; -webkit-background-clip: text;
+    color: transparent; -webkit-text-fill-color: transparent;
+  }
+  .simple-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 48px;
+    margin-top: 56px;
+    align-items: center;
+  }
+  @media (max-width: 880px) { .simple-grid { grid-template-columns: 1fr; gap: 36px; } }
+  .simple-grid p {
+    font-size: 1.02rem;
+    line-height: 1.65;
+    color: #c8cee0;
+  }
+  .simple-grid p + p { margin-top: 12px; }
+  .simple-grid p strong { color: var(--fg); }
+  .simple-grid p em.amber {
+    color: var(--amber);
+    font-style: normal;
+    font-weight: 500;
+  }
+
+  /* Mini comparison cards inside simple section */
+  .simple-pair {
+    display: grid;
+    gap: 14px;
+  }
+  .simple-card {
+    padding: 22px 24px;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: var(--radius);
+    background: rgba(255,255,255,0.015);
+    position: relative;
+    overflow: hidden;
+  }
+  .simple-card--bad {
+    border-color: rgba(255,255,255,0.07);
+  }
+  .simple-card--good {
+    border-color: rgba(255, 193, 77, 0.30);
+    background: linear-gradient(180deg, rgba(255, 193, 77, 0.06), rgba(255, 193, 77, 0.01));
+    box-shadow: 0 0 28px rgba(255, 193, 77, 0.08);
+  }
+  .simple-card__tag {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    color: var(--dim);
+  }
+  .simple-card--good .simple-card__tag { color: var(--amber); }
+  .simple-card h4 {
+    font-size: 1.02rem;
+    margin: 0 0 6px;
+    color: var(--fg);
+  }
+  .simple-card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+  .simple-card__models {
+    margin-top: 12px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.03em;
+    color: var(--fg);
+    padding-top: 12px;
+    border-top: 1px dashed rgba(255,255,255,0.07);
+  }
+  .simple-card--bad .simple-card__models { color: var(--dim); }
+
   /* === Mira final CTA =================================================*/
   .final-cta {
     text-align: center;
@@ -848,6 +939,7 @@
       <a href="#numbers">Numbers</a>
       <a href="#levels">Levels</a>
       <a href="#open">Open</a>
+      <a href="#simple">Small</a>
       <a href="https://github.com/borademircan/mip" class="cta">GitHub →</a>
     </div>
   </div>
@@ -882,7 +974,7 @@
 
     <h1>A new level of communication with AI — <em>three participants, one loop.</em></h1>
     <p class="lead" style="margin: 0 auto;">
-      Mira is a conversational AI surface built on two open protocols. <strong style="color:#e5e9f2;">Model Interface Protocol (MIP)</strong> describes the *interface* — what should be on screen. <strong style="color:#e5e9f2;">Model Context Protocol (MCP)</strong> exposes the *tools* — so any MCP-capable client (Claude Desktop, Cursor, your own agent) can drive Mira. Text on the left, a live JSON-driven dashboard on the right, and a triangular feedback loop where the canvas talks back.
+      Mira is a conversational AI surface built on two open protocols. <strong style="color:#e5e9f2;">Model Interface Protocol (MIP)</strong> describes the *interface*. <strong style="color:#e5e9f2;">Model Context Protocol (MCP)</strong> exposes the *tools*. Together they mean <strong style="color: var(--amber);">any tool-calling LLM can drive Mira</strong> — no agent framework, no orchestration. Claude Haiku, Gemini Flash, GPT-mini, or a local 8B open model is enough. Often *better*.
     </p>
 
     <div class="cta-row" style="justify-content: center;">
@@ -1253,6 +1345,43 @@
         <li>The <strong>MIP protocol itself is MIT</strong>. Fork it, embed it in your own product, ship a competing runtime — all of that's intended.</li>
       </ul>
     </details>
+  </div>
+</section>
+
+<!-- ============================== SMALL MODELS ========================= -->
+<section id="simple" class="simple-section">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Counterintuitive truth</div>
+      <h2>Small models often <em>win here.</em></h2>
+      <p class="lead" style="margin: 0 auto;">
+        Mira doesn't need a frontier model. A small, fast one is usually enough — and often <strong style="color: var(--fg);">better</strong>. The protocol does the heavy lifting; the model just has to pick widgets and bind them to data.
+      </p>
+    </div>
+
+    <div class="simple-grid">
+      <div>
+        <p>Big models <strong>over-elaborate</strong>. They write five-paragraph justifications, debate themselves, hedge every claim, and burn tokens explaining what a chart means before they emit it.</p>
+        <p><em class="amber">Small models think simply</em>. They emit a sharp tool call, then move on. Mira's visual layer turns that simplicity into a chart you understand at a glance — no scrolling, no parsing prose, no waiting on a reasoning loop.</p>
+        <p>When the model thinks simple, the dashboard reads simple. When the dashboard reads simple, you spot the answer the moment you see it. <strong>That's also the power of this system.</strong> The constraint of working through MIP tool calls forces clarity at every layer.</p>
+        <p>The same compression idea that makes the protocol token-efficient makes <em class="amber">small models</em> the right tool for the job: they emit fewer tokens, they cost less, they run locally on a laptop, and the output is sharper.</p>
+      </div>
+
+      <div class="simple-pair">
+        <div class="simple-card simple-card--bad">
+          <div class="simple-card__tag">FRONTIER MODELS</div>
+          <h4>Over-engineered for this</h4>
+          <p>Explains the chart in three paragraphs before drawing it. Burns reasoning tokens debating its own choices. Slower; pricier; more verbose. Sometimes useful — usually overkill for visual authoring.</p>
+          <div class="simple-card__models">Claude Opus · GPT-4.1 · Gemini 2.5 Pro · DeepSeek R1 (70B+)</div>
+        </div>
+        <div class="simple-card simple-card--good">
+          <div class="simple-card__tag">SMALL MODELS · RECOMMENDED</div>
+          <h4>Sharp, fast, cheap, clear</h4>
+          <p>Picks a widget. Emits a tool call. Moves on. The visual reads cleaner because the model thinks cleaner. Lower latency, lower cost, easier to self-host. Open-source variants in this tier run on a laptop.</p>
+          <div class="simple-card__models">Claude Haiku · Gemini Flash · GPT-mini · Qwen 2.5 7–14B · Llama 3.1 8B · Mistral Small</div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
