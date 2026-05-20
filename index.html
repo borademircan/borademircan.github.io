@@ -12,8 +12,8 @@
 <meta property="og:title" content="Mira — your interface mirror" />
 <meta property="og:description" content="A new level of communication with AI. Three-participant feedback loop: you, the model, the canvas. Built on the open Model Interface Protocol." />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://borademircan.com" />
-<meta property="og:image" content="https://borademircan.com/assets/mira-visualize.jpg" />
+<meta property="og:url" content="https://borademircan.com/mira" />
+<meta property="og:image" content="https://borademircan.com/mira/assets/mira-visualize.jpg" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Mira — your interface mirror" />
 <meta name="twitter:description" content="A new level of communication with AI — built on the open Model Interface Protocol." />
@@ -225,8 +225,46 @@
     letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--cyan);
+    margin-bottom: 24px;
+  }
+
+  .hero-badges {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
     margin-bottom: 36px;
   }
+  .hero-badge {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    padding: 6px 12px 5px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.02);
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .hero-badge.mip {
+    color: var(--cyan);
+    border-color: rgba(0, 240, 255, 0.30);
+    background: rgba(0, 240, 255, 0.05);
+    box-shadow: 0 0 12px rgba(0, 240, 255, 0.10);
+  }
+  .hero-badge.mcp {
+    color: var(--magenta);
+    border-color: rgba(255, 43, 214, 0.30);
+    background: rgba(255, 43, 214, 0.05);
+    box-shadow: 0 0 12px rgba(255, 43, 214, 0.10);
+  }
+  .hero-badge.open {
+    color: var(--lime);
+    border-color: rgba(184, 255, 94, 0.30);
+    background: rgba(184, 255, 94, 0.04);
+  }
+  @media (max-width: 520px) { .hero-badge { font-size: 0.65rem; padding: 5px 10px 4px; } }
   .hero h1 {
     max-width: 22ch;
     margin: 0 auto 24px;
@@ -836,9 +874,15 @@
     <div class="wordmark-big">MIRA</div>
     <div class="tagline">your interface mirror</div>
 
+    <div class="hero-badges">
+      <span class="hero-badge mip">MIP — Model Interface Protocol</span>
+      <span class="hero-badge mcp">MCP — Model Context Protocol</span>
+      <span class="hero-badge open">Open · MIT</span>
+    </div>
+
     <h1>A new level of communication with AI — <em>three participants, one loop.</em></h1>
     <p class="lead" style="margin: 0 auto;">
-      Mira is a conversational AI surface built on the open <strong style="color:#e5e9f2;">Model Interface Protocol</strong>. Text on the left, a live JSON-driven dashboard on the right — and a triangular feedback loop where the canvas talks back.
+      Mira is a conversational AI surface built on two open protocols. <strong style="color:#e5e9f2;">Model Interface Protocol (MIP)</strong> describes the *interface* — what should be on screen. <strong style="color:#e5e9f2;">Model Context Protocol (MCP)</strong> exposes the *tools* — so any MCP-capable client (Claude Desktop, Cursor, your own agent) can drive Mira. Text on the left, a live JSON-driven dashboard on the right, and a triangular feedback loop where the canvas talks back.
     </p>
 
     <div class="cta-row" style="justify-content: center;">
