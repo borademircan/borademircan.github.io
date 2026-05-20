@@ -282,6 +282,28 @@ const fs = require("fs");
   // remove any prior installer-managed AI connection so re-runs stay clean
   j.connections = j.connections.filter(c => c.id !== "conn-ai-default");
 
+  // Pull endpoints from data/apps/<appId>/endpoints.json if it exists, so
+  // the Connections page Test button works without the user having to
+  // configure anything manually.
+  let appEndpoints = [];
+  const epPath = "data/apps/" + ${JSON.stringify(APP_ID)} + "/endpoints.json";
+  try {
+    if (fs.existsSync(epPath)) {
+      const ep = JSON.parse(fs.readFileSync(epPath, "utf8"));
+      appEndpoints = (ep.endpoints || []).map((e) => ({
+        id: e.id,
+        label: e.label,
+        method: e.method,
+        path: e.path,
+        mapPath: e.mapPath || "$.data",
+        description: e.description || "",
+        queryParams: [],
+        headers: [],
+        ...(e.body ? { body: e.body } : {}),
+      }));
+    }
+  } catch (_) { /* ignore — fallback to empty list */ }
+
   const conn = {
     id: "conn-ai-default",
     name: ${JSON.stringify(APP_NAME)},
@@ -292,13 +314,18 @@ const fs = require("fs");
       model: ${JSON.stringify(AI_MODEL)},
       ...(${JSON.stringify(API_KEY)} ? { apiKey: ${JSON.stringify(API_KEY)} } : {}),
     },
+    settings: {
+      providerId: ${JSON.stringify(APP_ID)},
+      endpoints: appEndpoints,
+      scope: "global",
+    },
     enabledForAssistant: true,
     createdAt: new Date().toISOString(),
     createdBy: "installer",
   };
   j.connections.push(conn);
   fs.writeFileSync(path, JSON.stringify(j, null, 2) + "\n");
-  console.log("  · data/connections.json — added", conn.appId, "(" + conn.config.model + ")");
+  console.log("  · data/connections.json — added", conn.appId, "(" + conn.config.model + ") with", appEndpoints.length, "endpoint(s)");
 }
 NODESCRIPT
 
