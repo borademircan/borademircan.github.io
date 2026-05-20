@@ -582,6 +582,179 @@
   footer.site .colophon { color: var(--dim); font-size: 0.82rem; margin-top: 24px; }
   footer.site .colophon a { display: inline; color: var(--muted); }
 
+  /* === Open by design (OSS / local) ===================================*/
+  .open-section {
+    background: linear-gradient(180deg, transparent, rgba(184, 255, 94, 0.025), transparent);
+    border-top: 1px solid rgba(184, 255, 94, 0.10);
+    border-bottom: 1px solid rgba(184, 255, 94, 0.07);
+  }
+  .open-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: 48px;
+  }
+  @media (max-width: 900px) { .open-grid { grid-template-columns: 1fr; } }
+
+  .open-card {
+    position: relative;
+    padding: 28px 26px;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: var(--radius);
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .open-card::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--lime), transparent);
+    opacity: 0.5;
+  }
+  .open-card--featured {
+    border-color: rgba(184, 255, 94, 0.25);
+    background: linear-gradient(180deg, rgba(184, 255, 94, 0.06), rgba(184, 255, 94, 0.01));
+    box-shadow: 0 0 28px rgba(184, 255, 94, 0.08);
+  }
+  .open-card--featured::before {
+    background: linear-gradient(90deg, transparent, var(--lime), var(--cyan), transparent);
+    opacity: 0.7;
+  }
+  .open-card__tag {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--lime);
+    margin-bottom: 10px;
+  }
+  .open-card--featured .open-card__tag { color: var(--lime); }
+  .open-card h3 { font-size: 1.15rem; margin: 0 0 18px; color: var(--fg); }
+  .open-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 18px;
+    display: grid;
+    gap: 10px;
+  }
+  .open-card li {
+    position: relative;
+    padding-left: 18px;
+    color: var(--muted);
+    font-size: 0.93rem;
+    line-height: 1.5;
+  }
+  .open-card li::before {
+    content: "›";
+    position: absolute;
+    left: 0;
+    color: var(--lime);
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+  }
+  .open-card li strong { color: var(--fg); font-weight: 600; }
+  .open-card li code {
+    background: rgba(184, 255, 94, 0.08);
+    color: var(--lime);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.85em;
+  }
+  .open-card__hint {
+    margin: auto 0 0 0;
+    padding-top: 14px;
+    border-top: 1px dashed rgba(255,255,255,0.06);
+    font-size: 0.85rem;
+    color: var(--dim);
+    line-height: 1.5;
+  }
+  .open-card__hint code {
+    background: rgba(255,255,255,0.04);
+    color: var(--fg);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+
+  .open-stats {
+    margin-top: 36px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 760px) { .open-stats { grid-template-columns: 1fr; } }
+  .stat-mini {
+    text-align: center;
+    padding: 22px 20px;
+    border: 1px solid rgba(184, 255, 94, 0.15);
+    border-radius: var(--radius);
+    background: rgba(184, 255, 94, 0.03);
+  }
+  .stat-mini__big {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: clamp(2rem, 4vw, 2.6rem);
+    background: linear-gradient(135deg, var(--lime), var(--cyan));
+    background-clip: text; -webkit-background-clip: text;
+    color: transparent; -webkit-text-fill-color: transparent;
+    line-height: 1;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+  .stat-mini__label { color: var(--muted); font-size: 0.88rem; }
+
+  .open-tips {
+    margin-top: 32px;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: var(--radius);
+    background: rgba(255,255,255,0.015);
+    overflow: hidden;
+  }
+  .open-tips summary {
+    padding: 18px 24px;
+    cursor: pointer;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.82rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--lime);
+    list-style: none;
+    transition: background 150ms ease;
+  }
+  .open-tips summary:hover { background: rgba(184, 255, 94, 0.04); }
+  .open-tips summary::-webkit-details-marker { display: none; }
+  .open-tips[open] summary { border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .open-tips ul {
+    list-style: none;
+    padding: 22px 28px;
+    margin: 0;
+    display: grid;
+    gap: 14px;
+  }
+  .open-tips ul li {
+    position: relative;
+    padding-left: 22px;
+    color: var(--muted);
+    font-size: 0.94rem;
+    line-height: 1.55;
+  }
+  .open-tips ul li::before {
+    content: "▸";
+    position: absolute;
+    left: 0; top: 1px;
+    color: var(--lime);
+    font-family: "JetBrains Mono", monospace;
+  }
+  .open-tips ul li strong { color: var(--fg); font-weight: 600; }
+  .open-tips ul li code {
+    background: rgba(184, 255, 94, 0.08);
+    color: var(--lime);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 0.87em;
+    font-family: "JetBrains Mono", monospace;
+  }
+
   /* === Mira final CTA =================================================*/
   .final-cta {
     text-align: center;
@@ -636,6 +809,7 @@
       <a href="#triangle">Triangle</a>
       <a href="#numbers">Numbers</a>
       <a href="#levels">Levels</a>
+      <a href="#open">Open</a>
       <a href="https://github.com/borademircan/mip" class="cta">GitHub →</a>
     </div>
   </div>
@@ -952,14 +1126,100 @@
   </div>
 </section>
 
+<!-- ============================== OPEN ================================= -->
+<section id="open" class="open-section">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow" style="border-color: rgba(184,255,94,0.3); background: rgba(184,255,94,0.05); color: var(--lime);">Open by design</div>
+      <h2>Yours to host. Yours to <em>own.</em></h2>
+      <p class="lead" style="margin: 0 auto;">
+        No vendor. No lock-in. No data leaks. Mira runs on your machine, with any tool-calling LLM you want — local or cloud, swap on the fly.
+      </p>
+    </div>
+
+    <div class="open-grid">
+
+      <!-- 1. Local runtimes -->
+      <div class="open-card">
+        <div class="open-card__tag">01 — Serve it locally</div>
+        <h3>Local runtimes</h3>
+        <ul>
+          <li><strong>Ollama</strong> — easiest. <code>ollama pull qwen2.5:14b</code>, done.</li>
+          <li><strong>vLLM</strong> — fastest throughput, OpenAI-compatible server.</li>
+          <li><strong>LM Studio</strong> — friendly GUI, model browser, one-click server.</li>
+          <li><strong>llama.cpp</strong> — the engine underneath, runs on a Mac mini.</li>
+        </ul>
+        <p class="open-card__hint">Mira speaks any OpenAI-compatible HTTP endpoint. Drop the base URL in the Connections page, add a token if your runtime needs one, you're live.</p>
+      </div>
+
+      <!-- 2. Open-source models (featured) -->
+      <div class="open-card open-card--featured">
+        <div class="open-card__tag">02 — Pick a brain · 16–31B sweet spot</div>
+        <h3>Open-source models</h3>
+        <ul>
+          <li><strong>Qwen 2.5 (14B / 32B)</strong> — best tool-calling open model. Default recommendation.</li>
+          <li><strong>Llama 3.1 (8B / 70B)</strong> — broadest ecosystem, mature function-calling.</li>
+          <li><strong>DeepSeek V3 / R1</strong> — strong reasoning; great for the triangle's "think loop."</li>
+          <li><strong>Mistral Small / Large</strong> — fast, multilingual, reliable structured output.</li>
+          <li><strong>Phi-4 / Gemma 2</strong> — light (under 16B), runs on a laptop.</li>
+        </ul>
+        <p class="open-card__hint">All Apache-2.0 / MIT / community licenses. Quantize to <code>Q4_K_M</code> for consumer GPUs, <code>Q5_K_M</code> for headroom. The 16–31B band is where tool-calling reliability meets affordable inference.</p>
+      </div>
+
+      <!-- 3. Cloud providers -->
+      <div class="open-card">
+        <div class="open-card__tag">03 — Or bring a cloud</div>
+        <h3>Cloud providers</h3>
+        <ul>
+          <li><strong>Anthropic Claude</strong> — Sonnet 4.5 / Opus 4.7 / Haiku 4.5</li>
+          <li><strong>OpenAI</strong> — GPT-4.1, GPT-4o, o-series reasoning</li>
+          <li><strong>Google Gemini</strong> — 2.5 Pro / Flash, 1M-token context</li>
+          <li><strong>Groq / Together / Fireworks</strong> — fast inference for open models</li>
+        </ul>
+        <p class="open-card__hint">Multi-provider behind one chat surface. Swap models mid-conversation without losing context. Per-connection API keys, stored encrypted, never written into saved dashboards.</p>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="open-stats">
+      <div class="stat-mini">
+        <div class="stat-mini__big">0</div>
+        <div class="stat-mini__label">tokens leave your machine in local mode</div>
+      </div>
+      <div class="stat-mini">
+        <div class="stat-mini__big">16–31B</div>
+        <div class="stat-mini__label">parameter sweet spot for reliable tool-calling</div>
+      </div>
+      <div class="stat-mini">
+        <div class="stat-mini__big">MIT</div>
+        <div class="stat-mini__label">protocol license — fork it, embed it, ship it</div>
+      </div>
+    </div>
+
+    <!-- Pro tips -->
+    <details class="open-tips">
+      <summary>▸ Pro tips for self-hosting</summary>
+      <ul>
+        <li>Start with <code>qwen2.5:14b-instruct-q4_K_M</code> via Ollama — about 9 GB on disk, comfortably runs on a single 16 GB GPU or an M-series Mac.</li>
+        <li>Bump context length for long tool-call conversations: <code>OLLAMA_NUM_CTX=32768</code> (or higher) so Mira's tool-result history doesn't get truncated.</li>
+        <li>Mira uses <strong>OpenAI-style function calling</strong>. Ollama, vLLM, LM Studio, and llama.cpp's server all support it — verify your chosen model card lists "tool use" or "function calling."</li>
+        <li>For multi-user or higher throughput, switch from Ollama → <strong>vLLM</strong>. Same protocol, dramatically higher concurrency.</li>
+        <li>The fastest hosted option you might miss: <strong>Groq</strong> serves Llama and Qwen at thousands of tokens/sec. The chat feels almost local because TTFB is so low.</li>
+        <li>Per-connection API key overrides are stored encrypted; live keys never appear inside saved MIP dashboards.</li>
+        <li>The <strong>MIP protocol itself is MIT</strong>. Fork it, embed it in your own product, ship a competing runtime — all of that's intended.</li>
+      </ul>
+    </details>
+  </div>
+</section>
+
 <!-- ============================== FINAL CTA ============================ -->
 <section id="cta">
   <div class="container">
     <div class="final-cta">
-      <div class="eyebrow" style="margin-bottom: 16px;">Where it lives</div>
+      <div class="eyebrow" style="margin-bottom: 16px;">Get started</div>
       <h2>The protocol is open. <em>The interface is yours.</em></h2>
       <p class="lead" style="margin: 0 auto 28px;">
-        Run Mira on your own machine. Bring a cloud key (Anthropic, OpenAI, Gemini) or point her at a local open-source model in the 16–31B range (Qwen 2.5, Llama 3.1, DeepSeek, Mistral) for full privacy — not a single token leaves your computer.
+        Clone the repo, install pnpm, point Mira at any tool-calling LLM. Five minutes to a working two-column conversation.
       </p>
       <div class="cta-row" style="justify-content: center;">
         <a class="btn btn-primary" href="https://github.com/borademircan/mip">Get the code →</a>
