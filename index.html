@@ -1,0 +1,1013 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Mira — your interface mirror</title>
+<meta name="description" content="Mira is a conversational AI surface built on the open Model Interface Protocol (MIP). Two-column conversation: text on the left, a live JSON-driven dashboard on the right. 3–5× fewer tokens than prose chat, ~10× lighter than code-gen tools." />
+<meta name="theme-color" content="#06070b" />
+<meta name="author" content="Bora Demircan" />
+
+<!-- Open Graph -->
+<meta property="og:title" content="Mira — your interface mirror" />
+<meta property="og:description" content="A new level of communication with AI. Three-participant feedback loop: you, the model, the canvas. Built on the open Model Interface Protocol." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://borademircan.com" />
+<meta property="og:image" content="https://borademircan.com/assets/mira-visualize.jpg" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Mira — your interface mirror" />
+<meta name="twitter:description" content="A new level of communication with AI — built on the open Model Interface Protocol." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+
+<style>
+  :root {
+    --bg: #06070b;
+    --bg-2: #0a0c14;
+    --bg-3: #11141e;
+    --grid: rgba(0, 240, 255, 0.04);
+    --grid-strong: rgba(0, 240, 255, 0.08);
+    --fg: #e5e9f2;
+    --muted: #8089a3;
+    --dim: #5a6275;
+
+    --cyan: #00f0ff;
+    --cyan-soft: #5ee9ff;
+    --magenta: #ff2bd6;
+    --magenta-soft: #ff7be6;
+    --violet: #a855f7;
+    --lime: #b8ff5e;
+    --amber: #ffc14d;
+
+    --glow-cyan: 0 0 16px rgba(0, 240, 255, 0.35), 0 0 32px rgba(0, 240, 255, 0.18);
+    --glow-magenta: 0 0 16px rgba(255, 43, 214, 0.35), 0 0 32px rgba(255, 43, 214, 0.18);
+
+    --radius: 14px;
+    --radius-sm: 8px;
+    --max-w: 1180px;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { padding: 0; margin: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: "Space Grotesk", system-ui, -apple-system, "Segoe UI", Inter, sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+    letter-spacing: -0.005em;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* === Background: deep dark, faint grid, two atmospheric blooms ===== */
+  body::before, body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::before {
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse at 50% 30%, #000 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse at 50% 30%, #000 30%, transparent 80%);
+  }
+  body::after {
+    background:
+      radial-gradient(800px 600px at 10% 10%, rgba(0, 240, 255, 0.10), transparent 60%),
+      radial-gradient(900px 700px at 90% 30%, rgba(255, 43, 214, 0.08), transparent 60%),
+      radial-gradient(1000px 800px at 50% 110%, rgba(168, 85, 247, 0.10), transparent 60%);
+  }
+
+  /* === Scan-line overlay (very subtle) ============================== */
+  .scanlines {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.012) 0,
+      rgba(255,255,255,0.012) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    mix-blend-mode: overlay;
+  }
+
+  main, header, footer, nav { position: relative; z-index: 2; }
+
+  /* === Layout primitives =============================================*/
+  .container { max-width: var(--max-w); margin: 0 auto; padding: 0 24px; }
+  section { padding: 96px 0; position: relative; }
+  @media (max-width: 720px) { section { padding: 72px 0; } body { font-size: 16px; } }
+
+  /* === Typography ====================================================*/
+  h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.02em; line-height: 1.15; margin: 0 0 16px; }
+  h1 { font-size: clamp(2.4rem, 5.5vw, 4.8rem); letter-spacing: -0.035em; }
+  h2 { font-size: clamp(1.8rem, 3.6vw, 2.8rem); }
+  h3 { font-size: clamp(1.2rem, 2vw, 1.4rem); }
+  p { margin: 0 0 16px; color: #c8cee0; }
+  a { color: var(--cyan); text-decoration: none; }
+  a:hover { color: var(--cyan-soft); }
+  code, .mono { font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace; }
+  .mono-tag { font-family: "JetBrains Mono", monospace; font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--cyan); }
+
+  .eyebrow {
+    display: inline-block;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    padding: 5px 12px 4px;
+    border-radius: 999px;
+    margin-bottom: 24px;
+    background: rgba(0, 240, 255, 0.04);
+  }
+
+  .lead { font-size: clamp(1.05rem, 1.4vw, 1.2rem); color: #b5bcd1; max-width: 60ch; }
+
+  /* === Nav ============================================================*/
+  nav.top {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 100;
+    padding: 18px 24px;
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    background: rgba(6, 7, 11, 0.55);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  nav.top .inner {
+    max-width: var(--max-w);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  nav.top a.brand { display: inline-flex; align-items: center; gap: 12px; color: var(--fg); }
+  nav.top a.brand .wordmark { font-weight: 700; letter-spacing: 0.18em; font-size: 0.95rem; }
+  nav.top .links { display: flex; gap: 24px; align-items: center; font-size: 0.92rem; }
+  nav.top .links a { color: var(--muted); }
+  nav.top .links a:hover { color: var(--fg); }
+  @media (max-width: 720px) { nav.top .links a:not(.cta) { display: none; } }
+
+  /* === Logo ============================================================*/
+  .logo-mark {
+    width: 28px;
+    height: 28px;
+    display: block;
+    filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.5));
+  }
+  .logo-mark--lg { width: 64px; height: 64px; filter: drop-shadow(0 0 18px rgba(0, 240, 255, 0.55)); }
+
+  /* === Buttons =========================================================*/
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 22px;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    font-size: 0.95rem;
+    letter-spacing: 0.01em;
+    transition: all 180ms ease;
+    border: 1px solid transparent;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--cyan), var(--magenta));
+    color: #060810;
+    font-weight: 600;
+    box-shadow: 0 0 24px rgba(0, 240, 255, 0.35), 0 0 60px rgba(255, 43, 214, 0.18);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 0 32px rgba(0, 240, 255, 0.55), 0 0 80px rgba(255, 43, 214, 0.3); color: #060810; }
+  .btn-ghost {
+    background: rgba(255,255,255,0.02);
+    color: var(--fg);
+    border-color: rgba(255,255,255,0.12);
+  }
+  .btn-ghost:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  .cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 32px; }
+
+  /* === Hero ============================================================*/
+  .hero {
+    padding: 160px 0 64px;
+    text-align: center;
+  }
+  .hero .wordmark-big {
+    font-size: clamp(3.4rem, 9vw, 7.2rem);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    background: linear-gradient(135deg, #fff 0%, var(--cyan-soft) 35%, var(--magenta-soft) 75%, #fff 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    margin: 0 0 4px;
+    line-height: 1;
+  }
+  .hero .tagline {
+    font-family: "JetBrains Mono", monospace;
+    font-size: clamp(0.85rem, 1.4vw, 1rem);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 36px;
+  }
+  .hero h1 {
+    max-width: 22ch;
+    margin: 0 auto 24px;
+    font-size: clamp(1.8rem, 4vw, 3.2rem);
+    color: var(--fg);
+    font-weight: 500;
+    line-height: 1.18;
+  }
+  .hero h1 em {
+    font-style: normal;
+    background: linear-gradient(135deg, var(--cyan), var(--magenta));
+    background-clip: text; -webkit-background-clip: text;
+    color: transparent; -webkit-text-fill-color: transparent;
+  }
+  .hero .lead { margin: 0 auto; }
+
+  .hero-shots {
+    margin-top: 72px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    position: relative;
+  }
+  .hero-shots::before {
+    content: "";
+    position: absolute;
+    inset: -40px;
+    background: radial-gradient(60% 50% at 50% 50%, rgba(0, 240, 255, 0.15), transparent 70%);
+    z-index: -1;
+    pointer-events: none;
+  }
+  .shot {
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--bg-3);
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(0, 240, 255, 0.08), 0 0 40px rgba(0, 240, 255, 0.06);
+  }
+  .shot img { width: 100%; height: auto; display: block; }
+  .shot .label {
+    position: absolute;
+    top: 14px; left: 14px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(6, 7, 11, 0.75);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--cyan);
+  }
+  .shot .label.magenta { border-color: rgba(255, 43, 214, 0.3); color: var(--magenta); }
+
+  .shot-caption {
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-top: 12px;
+  }
+  .shot-caption strong { color: var(--fg); font-weight: 600; }
+
+  @media (max-width: 760px) {
+    .hero { padding: 130px 0 32px; }
+    .hero-shots { grid-template-columns: 1fr; }
+  }
+
+  /* === Section header pattern =========================================*/
+  .section-head { max-width: 760px; margin: 0 auto 56px; text-align: center; }
+  .section-head h2 em {
+    font-style: normal;
+    background: linear-gradient(135deg, var(--cyan), var(--magenta));
+    background-clip: text; -webkit-background-clip: text;
+    color: transparent; -webkit-text-fill-color: transparent;
+  }
+
+  /* === Triangle section ===============================================*/
+  .triangle-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: 64px;
+    align-items: center;
+  }
+  @media (max-width: 880px) { .triangle-wrap { grid-template-columns: 1fr; gap: 48px; } }
+
+  .triangle-art {
+    position: relative;
+    aspect-ratio: 1 / 0.92;
+    max-width: 460px;
+    margin: 0 auto;
+  }
+  .triangle-art svg { width: 100%; height: 100%; }
+  .triangle-art .node {
+    fill: var(--bg-2);
+    stroke: var(--cyan);
+    stroke-width: 1.4;
+    filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.6));
+  }
+  .triangle-art .node.magenta { stroke: var(--magenta); filter: drop-shadow(0 0 12px rgba(255, 43, 214, 0.6)); }
+  .triangle-art .node.violet { stroke: var(--violet); filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.6)); }
+  .triangle-art text {
+    fill: var(--fg);
+    font-family: "Space Grotesk";
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .triangle-art .label-mono {
+    font-family: "JetBrains Mono";
+    fill: var(--muted);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .triangle-art .edge { stroke: rgba(0, 240, 255, 0.35); stroke-width: 1.4; fill: none; stroke-dasharray: 4 6; }
+  .triangle-art .edge-label { font-family: "JetBrains Mono"; font-size: 10px; fill: var(--cyan-soft); letter-spacing: 0.15em; }
+
+  .triangle-art .pulse-1, .triangle-art .pulse-2, .triangle-art .pulse-3 {
+    fill: var(--cyan);
+    animation: pulse 2.4s ease-in-out infinite;
+    filter: drop-shadow(0 0 6px var(--cyan));
+  }
+  .triangle-art .pulse-2 { animation-delay: 0.8s; fill: var(--magenta); filter: drop-shadow(0 0 6px var(--magenta)); }
+  .triangle-art .pulse-3 { animation-delay: 1.6s; fill: var(--violet); filter: drop-shadow(0 0 6px var(--violet)); }
+  @keyframes pulse {
+    0%, 100% { opacity: 0; r: 4; }
+    50% { opacity: 1; r: 5; }
+  }
+
+  .triangle-channels { display: grid; gap: 18px; }
+  .channel {
+    padding: 18px 20px;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-left: 2px solid var(--cyan);
+    background: rgba(255,255,255,0.015);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+  .channel.magenta { border-left-color: var(--magenta); }
+  .channel.violet  { border-left-color: var(--violet); }
+  .channel h4 { font-size: 0.95rem; margin: 0 0 4px; color: var(--fg); font-weight: 600; }
+  .channel h4 .ch { font-family: "JetBrains Mono"; font-size: 0.72rem; color: var(--cyan); letter-spacing: 0.18em; margin-right: 8px; }
+  .channel.magenta h4 .ch { color: var(--magenta); }
+  .channel.violet h4 .ch  { color: var(--violet); }
+  .channel p { margin: 0; font-size: 0.96rem; color: var(--muted); }
+
+  /* === Numbers section ================================================*/
+  .numbers {
+    background: linear-gradient(180deg, transparent, rgba(0, 240, 255, 0.03), transparent);
+    border-top: 1px solid rgba(0, 240, 255, 0.07);
+    border-bottom: 1px solid rgba(255, 43, 214, 0.07);
+  }
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 48px;
+  }
+  @media (max-width: 760px) { .stat-row { grid-template-columns: 1fr; } }
+  .stat {
+    text-align: center;
+    padding: 32px 24px;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius);
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+    position: relative;
+    overflow: hidden;
+  }
+  .stat::before {
+    content: ""; position: absolute; inset: -1px -1px auto -1px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    opacity: 0.5;
+  }
+  .stat .big {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: clamp(2.6rem, 5vw, 3.6rem);
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, var(--cyan), var(--magenta));
+    background-clip: text; -webkit-background-clip: text;
+    color: transparent; -webkit-text-fill-color: transparent;
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  .stat .desc { color: var(--muted); font-size: 0.92rem; line-height: 1.5; }
+
+  /* === Comparison table ===============================================*/
+  .compare {
+    margin-top: 56px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: var(--radius);
+    background: rgba(255,255,255,0.015);
+  }
+  .compare-row {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1.4fr;
+    align-items: center;
+    padding: 18px 22px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 0.92rem;
+  }
+  .compare-row:last-child { border-bottom: none; }
+  .compare-row.header {
+    background: rgba(0, 240, 255, 0.04);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--cyan);
+  }
+  .compare-row.mira { background: linear-gradient(90deg, rgba(0, 240, 255, 0.07), rgba(255, 43, 214, 0.05)); }
+  .compare-row .name { font-weight: 600; }
+  .compare-row .name strong { color: var(--cyan); }
+  .compare-row .value { color: var(--fg); font-family: "JetBrains Mono"; font-size: 0.88rem; }
+  .compare-row .muted { color: var(--muted); }
+  @media (max-width: 760px) {
+    .compare-row { grid-template-columns: 1fr; gap: 4px; padding: 14px 18px; }
+    .compare-row.header { display: none; }
+    .compare-row .value::before { content: attr(data-label); display: block; font-family: "JetBrains Mono"; font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--dim); margin-top: 6px; }
+  }
+
+  /* === Levels (vertical timeline) =====================================*/
+  .levels {
+    display: grid;
+    gap: 16px;
+    margin-top: 56px;
+  }
+  .level {
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    align-items: center;
+    gap: 24px;
+    padding: 22px 24px;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: var(--radius);
+    background: rgba(255,255,255,0.02);
+    transition: all 200ms ease;
+  }
+  .level:hover { border-color: rgba(0, 240, 255, 0.3); background: rgba(0, 240, 255, 0.03); transform: translateX(4px); }
+  .level .num {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: 2rem;
+    color: var(--dim);
+    line-height: 1;
+  }
+  .level.live .num { color: var(--cyan); text-shadow: 0 0 16px rgba(0,240,255,0.5); }
+  .level h3 { margin: 0 0 4px; font-size: 1.1rem; }
+  .level h3 .name { color: var(--fg); }
+  .level p { margin: 0; color: var(--muted); font-size: 0.95rem; line-height: 1.45; }
+  .badge {
+    padding: 5px 11px 4px;
+    border-radius: 999px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .badge.live { background: rgba(0, 240, 255, 0.15); color: var(--cyan); border: 1px solid rgba(0, 240, 255, 0.35); box-shadow: 0 0 12px rgba(0,240,255,0.25); }
+  .badge.soon { background: rgba(168, 85, 247, 0.12); color: var(--violet); border: 1px solid rgba(168, 85, 247, 0.3); }
+  .badge.roadmap { background: rgba(255,255,255,0.04); color: var(--muted); border: 1px solid rgba(255,255,255,0.08); }
+  .badge.eureka { background: rgba(255, 43, 214, 0.12); color: var(--magenta); border: 1px solid rgba(255, 43, 214, 0.35); box-shadow: 0 0 12px rgba(255, 43, 214, 0.25); }
+
+  @media (max-width: 720px) {
+    .level { grid-template-columns: 1fr; gap: 10px; }
+    .level .num { font-size: 1.4rem; }
+    .badge { justify-self: start; }
+  }
+
+  /* === Tracks grid ====================================================*/
+  .tracks {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+    margin-top: 56px;
+  }
+  @media (max-width: 760px) { .tracks { grid-template-columns: 1fr; } }
+  .track {
+    padding: 26px 24px;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: var(--radius);
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+    position: relative;
+    overflow: hidden;
+  }
+  .track::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    opacity: 0.4;
+  }
+  .track .letter {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.22em;
+    color: var(--cyan);
+    margin-bottom: 8px;
+  }
+  .track.b .letter { color: var(--violet); }
+  .track.c .letter { color: var(--lime); }
+  .track.d .letter { color: var(--magenta); }
+  .track h3 { margin: 0 0 10px; font-size: 1.2rem; }
+  .track p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+
+  /* === Quote block (sheet music) ======================================*/
+  .quote-block {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 36px 32px;
+    border: 1px solid rgba(0, 240, 255, 0.15);
+    border-radius: var(--radius);
+    background: linear-gradient(180deg, rgba(0, 240, 255, 0.04), rgba(255, 43, 214, 0.03));
+  }
+  .quote-block p:last-child { margin-bottom: 0; }
+
+  /* === Loop code (sheet music demo) ==================================*/
+  .codeblock {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.86rem;
+    line-height: 1.7;
+    padding: 24px 28px;
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    border-radius: var(--radius);
+    background: #04050a;
+    color: #c8cee0;
+    overflow-x: auto;
+    margin-top: 28px;
+    box-shadow: 0 0 32px rgba(0, 240, 255, 0.06) inset;
+  }
+  .codeblock .you   { color: var(--lime); }
+  .codeblock .mira  { color: var(--cyan); }
+  .codeblock .out   { color: var(--magenta); }
+  .codeblock .arrow { color: var(--dim); }
+  .codeblock .note  { color: var(--muted); }
+
+  /* === Footer ==========================================================*/
+  footer.site {
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding: 64px 24px 48px;
+    margin-top: 32px;
+  }
+  footer.site .inner {
+    max-width: var(--max-w); margin: 0 auto;
+    display: grid; grid-template-columns: 1.5fr 1fr; gap: 48px;
+    align-items: start;
+  }
+  @media (max-width: 720px) { footer.site .inner { grid-template-columns: 1fr; } }
+  footer.site h4 { font-size: 0.78rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--cyan); margin-bottom: 14px; font-family: "JetBrains Mono"; font-weight: 500; }
+  footer.site a { color: var(--muted); display: block; margin-bottom: 8px; font-size: 0.95rem; }
+  footer.site a:hover { color: var(--cyan); }
+  footer.site .colophon { color: var(--dim); font-size: 0.82rem; margin-top: 24px; }
+  footer.site .colophon a { display: inline; color: var(--muted); }
+
+  /* === Mira final CTA =================================================*/
+  .final-cta {
+    text-align: center;
+    padding: 96px 24px;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: var(--radius);
+    background:
+      radial-gradient(600px 300px at 30% 0%, rgba(0,240,255,0.10), transparent 70%),
+      radial-gradient(600px 300px at 70% 100%, rgba(255,43,214,0.10), transparent 70%),
+      rgba(255,255,255,0.015);
+    position: relative;
+    overflow: hidden;
+  }
+  .final-cta h2 { max-width: 16ch; margin: 0 auto 16px; }
+
+  /* === Section divider ascii =========================================*/
+  .divider {
+    text-align: center;
+    color: var(--dim);
+    font-family: "JetBrains Mono", monospace;
+    letter-spacing: 0.5em;
+    font-size: 0.75rem;
+    padding: 24px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="scanlines" aria-hidden="true"></div>
+
+<!-- ============================== NAV =================================== -->
+<nav class="top">
+  <div class="inner">
+    <a href="#" class="brand">
+      <svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true">
+        <defs>
+          <linearGradient id="lg" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0" stop-color="#00f0ff"/>
+            <stop offset="1" stop-color="#ff2bd6"/>
+          </linearGradient>
+        </defs>
+        <polygon points="16,3 29,28 3,28" fill="none" stroke="url(#lg)" stroke-width="1.6" stroke-linejoin="round"/>
+        <circle cx="16" cy="17" r="2.4" fill="url(#lg)"/>
+        <circle cx="16" cy="3"  r="1.6" fill="#00f0ff"/>
+        <circle cx="29" cy="28" r="1.6" fill="#ff2bd6"/>
+        <circle cx="3"  cy="28" r="1.6" fill="#a855f7"/>
+      </svg>
+      <span class="wordmark">MIRA</span>
+    </a>
+    <div class="links">
+      <a href="#story">Story</a>
+      <a href="#triangle">Triangle</a>
+      <a href="#numbers">Numbers</a>
+      <a href="#levels">Levels</a>
+      <a href="https://github.com/borademircan/mip" class="cta">GitHub →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============================== HERO ================================= -->
+<main>
+<section class="hero">
+  <div class="container">
+    <svg class="logo-mark logo-mark--lg" viewBox="0 0 32 32" aria-hidden="true" style="margin: 0 auto 28px;">
+      <defs>
+        <linearGradient id="lg2" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0" stop-color="#00f0ff"/>
+          <stop offset="1" stop-color="#ff2bd6"/>
+        </linearGradient>
+      </defs>
+      <polygon points="16,3 29,28 3,28" fill="none" stroke="url(#lg2)" stroke-width="1.6" stroke-linejoin="round"/>
+      <circle cx="16" cy="17" r="2.4" fill="url(#lg2)"/>
+      <circle cx="16" cy="3"  r="1.6" fill="#00f0ff"/>
+      <circle cx="29" cy="28" r="1.6" fill="#ff2bd6"/>
+      <circle cx="3"  cy="28" r="1.6" fill="#a855f7"/>
+    </svg>
+
+    <div class="wordmark-big">MIRA</div>
+    <div class="tagline">your interface mirror</div>
+
+    <h1>A new level of communication with AI — <em>three participants, one loop.</em></h1>
+    <p class="lead" style="margin: 0 auto;">
+      Mira is a conversational AI surface built on the open <strong style="color:#e5e9f2;">Model Interface Protocol</strong>. Text on the left, a live JSON-driven dashboard on the right — and a triangular feedback loop where the canvas talks back.
+    </p>
+
+    <div class="cta-row" style="justify-content: center;">
+      <a class="btn btn-primary" href="https://github.com/borademircan/mip">Explore the protocol →</a>
+      <a class="btn btn-ghost" href="#story">Read the story</a>
+    </div>
+
+    <div class="hero-shots">
+      <div>
+        <div class="shot">
+          <span class="label">visualize</span>
+          <img src="assets/mira-visualize.jpg" alt="Mira visualizes — building a dashboard widget by widget from MIP tool calls" loading="eager" />
+        </div>
+        <div class="shot-caption">Mira <strong>visualizes</strong> in the canvas — building the interface widget by widget.</div>
+      </div>
+      <div>
+        <div class="shot">
+          <span class="label magenta">explain</span>
+          <img src="assets/mira-explain.jpg" alt="Mira explains — narrating the data in plain language" loading="eager" />
+        </div>
+        <div class="shot-caption">Mira <strong>explains</strong> in the chat — narrating the data, same conversation turn.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider">— · — · — · —</div>
+
+<!-- ============================== STORY ================================ -->
+<section id="story">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">The protocol</div>
+      <h2>MIP is sheet music <em>for interfaces.</em></h2>
+      <p class="lead" style="margin: 0 auto;">
+        Today's AI either writes long paragraphs of text or thousands of lines of code that have to compile and bundle before you see anything. Both are slow, expensive, and brittle.
+      </p>
+    </div>
+
+    <div class="quote-block">
+      <p>A composer doesn't ship an orchestra with every song — they ship the score, and any orchestra that can read it plays it back. <strong style="color:#e5e9f2;">MIP is the score for interfaces.</strong> A small, structured description of what should be on screen. The AI writes the score; your computer plays it instantly as a real, interactive interface.</p>
+    </div>
+
+    <pre class="codeblock">
+<span class="you">You say:</span>       "Add a sales chart."
+<span class="mira">Mira writes:</span>   { type: "lineChart", data: "$.sales" }   <span class="arrow">←</span> <span class="note">a tiny line of MIP (~12 tokens)</span>
+<span class="out">Screen shows:</span>  📈  a live, interactive chart, in under a second.</pre>
+
+    <p style="text-align:center; color:var(--muted); margin-top: 32px; max-width: 70ch; margin-left: auto; margin-right:auto;">
+      Same request through a code-gen tool? <strong style="color:#e5e9f2;">~450 tokens of JSX</strong>, then 5–15 seconds of compile and bundle. Through plain LLM chat? A paragraph describing what the chart <em>could</em> look like — and no actual chart.
+    </p>
+  </div>
+</section>
+
+<!-- ============================== TRIANGLE ============================ -->
+<section id="triangle">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">The interaction</div>
+      <h2>A triangular conversation <em>that converges on insight.</em></h2>
+      <p class="lead" style="margin: 0 auto;">
+        Most AI chat is a straight line: you ↔ AI. Mira adds a third participant — <strong style="color:#e5e9f2;">the canvas</strong> — and each side speaks its own language.
+      </p>
+    </div>
+
+    <div class="triangle-wrap">
+      <div class="triangle-art">
+        <svg viewBox="0 0 460 420" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <!-- edges -->
+          <path class="edge" d="M 230 60 Q 350 130 360 280"/>
+          <path class="edge" d="M 360 280 Q 230 380 100 280"/>
+          <path class="edge" d="M 100 280 Q 110 130 230 60"/>
+
+          <!-- edge labels -->
+          <text class="edge-label" x="320" y="160" transform="rotate(58, 320, 160)">MIP TOOL CALLS</text>
+          <text class="edge-label" x="195" y="385">VISUAL REPLY</text>
+          <text class="edge-label" x="65"  y="160" transform="rotate(-58, 65, 160)">SHARPER PROMPTS</text>
+
+          <!-- nodes -->
+          <circle class="node violet" cx="230" cy="60" r="36"/>
+          <text x="230" y="58" text-anchor="middle">YOU</text>
+          <text class="label-mono" x="230" y="74" text-anchor="middle">HUMAN</text>
+
+          <circle class="node" cx="100" cy="280" r="36"/>
+          <text x="100" y="278" text-anchor="middle">MIRA</text>
+          <text class="label-mono" x="100" y="294" text-anchor="middle">TEXT</text>
+
+          <circle class="node magenta" cx="360" cy="280" r="36"/>
+          <text x="360" y="278" text-anchor="middle">CANVAS</text>
+          <text class="label-mono" x="360" y="294" text-anchor="middle">LIVE UI</text>
+
+          <!-- pulses traveling along edges -->
+          <circle class="pulse-1" cx="290" cy="160" r="4"/>
+          <circle class="pulse-2" cx="230" cy="350" r="4"/>
+          <circle class="pulse-3" cx="170" cy="160" r="4"/>
+        </svg>
+      </div>
+
+      <div class="triangle-channels">
+        <div class="channel violet">
+          <h4><span class="ch">YOU → MIRA</span> Words</h4>
+          <p>You describe what you want — in any language, at any level of specificity.</p>
+        </div>
+        <div class="channel">
+          <h4><span class="ch">MIRA → CANVAS</span> MIP</h4>
+          <p>Mira's reply isn't only words. In the same turn she emits structured tool calls that mutate the canvas in real time.</p>
+        </div>
+        <div class="channel magenta">
+          <h4><span class="ch">CANVAS → YOU</span> Vision</h4>
+          <p>The canvas isn't passive. It's a visual reply. You see what the data actually looks like — what's clear, what's missing, what's wrong.</p>
+        </div>
+        <p style="margin-top: 8px; color: var(--fg); font-size: 0.98rem;">
+          And then the loop closes. Because the canvas just showed you something you didn't know, <strong style="color: var(--cyan);">your next prompt is better</strong> — sharper, more specific, deeper. The conversation doesn't drift; it <em style="color: var(--magenta); font-style: normal;">converges</em> on the interface you were trying to describe.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== NUMBERS ============================= -->
+<section id="numbers" class="numbers">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">The numbers</div>
+      <h2>Lighter conversation, <em>better output.</em></h2>
+      <p class="lead" style="margin: 0 auto;">
+        Mira's tool calls are tiny because they describe intent, not implementation. Three benchmarks that matter:
+      </p>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat">
+        <div class="big">3–5×</div>
+        <div class="desc">fewer tokens than plain LLM chat for the same dashboard</div>
+      </div>
+      <div class="stat">
+        <div class="big">10–30×</div>
+        <div class="desc">lighter per edit than code-gen sandboxes (v0, Bolt, Canvas)</div>
+      </div>
+      <div class="stat">
+        <div class="big">&lt; 1s</div>
+        <div class="desc">to render a new widget — client-side, no compile step</div>
+      </div>
+    </div>
+
+    <div class="compare">
+      <div class="compare-row header">
+        <div>Approach</div><div>Initial dashboard</div><div>Single edit</div><div>Time to see it</div>
+      </div>
+      <div class="compare-row mira">
+        <div class="name"><strong>Mira</strong> (MIP tool calls)</div>
+        <div class="value" data-label="Initial">~800–1,200 tokens</div>
+        <div class="value" data-label="Edit">~40–80 tokens</div>
+        <div class="value" data-label="Time">&lt; 1 second</div>
+      </div>
+      <div class="compare-row">
+        <div class="name muted">Plain LLM chat (markdown)</div>
+        <div class="value muted" data-label="Initial">~2k–3k tokens</div>
+        <div class="value muted" data-label="Edit">~200–400 tokens</div>
+        <div class="value muted" data-label="Time">streaming, no interactivity</div>
+      </div>
+      <div class="compare-row">
+        <div class="name muted">Code-gen sandbox (v0, Bolt)</div>
+        <div class="value muted" data-label="Initial">~3k–6k tokens</div>
+        <div class="value muted" data-label="Edit">~1.5k–4k tokens</div>
+        <div class="value muted" data-label="Time">5–15 s (compile + bundle)</div>
+      </div>
+      <div class="compare-row">
+        <div class="name muted">Canvas / Artifact tools</div>
+        <div class="value muted" data-label="Initial">~2k–4k tokens</div>
+        <div class="value muted" data-label="Edit">~2k–4k (full re-emit)</div>
+        <div class="value muted" data-label="Time">2–5 s per edit</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== LEVELS ============================== -->
+<section id="levels">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">The roadmap</div>
+      <h2>Mira grows through <em>five named levels.</em></h2>
+      <p class="lead" style="margin: 0 auto;">
+        Each level adds a new sense or output channel. The compression idea underneath stays the same — but the interaction surface keeps expanding.
+      </p>
+    </div>
+
+    <div class="levels">
+      <div class="level live">
+        <div class="num">01</div>
+        <div>
+          <h3><span class="name">Mira·One — Text</span></h3>
+          <p>Two-column chat + canvas. Mira reads, writes, and reflects intent through MIP tool calls.</p>
+        </div>
+        <span class="badge live">LIVE TODAY</span>
+      </div>
+      <div class="level">
+        <div class="num">02</div>
+        <div>
+          <h3><span class="name">Mira·Two — Vision</span></h3>
+          <p>Mira sees the canvas: layout-aware suggestions, screenshot-to-widget input, contextual edits.</p>
+        </div>
+        <span class="badge soon">SOON</span>
+      </div>
+      <div class="level">
+        <div class="num">03</div>
+        <div>
+          <h3><span class="name">Mira·Voice</span></h3>
+          <p>Real-time voice-to-voice. You speak; Mira speaks back; the interface mutates in sync with the audio.</p>
+        </div>
+        <span class="badge roadmap">ROADMAP</span>
+      </div>
+      <div class="level">
+        <div class="num">04</div>
+        <div>
+          <h3><span class="name">Mira·Atlas — Ambient</span></h3>
+          <p>Listens through a meeting, answers visually without breaking flow. Bidirectional voice control.</p>
+        </div>
+        <span class="badge roadmap">ROADMAP</span>
+      </div>
+      <div class="level">
+        <div class="num">05</div>
+        <div>
+          <h3><span class="name">Mira·Eureka — Live Imagery, Video & VR</span></h3>
+          <p>Generated visual content live in the conversation: imagery, motion, video, immersive VR scenes. The bridge from screens to spatial computing.</p>
+        </div>
+        <span class="badge eureka">EUREKA</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== TRACKS ============================== -->
+<section id="tracks">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">The capabilities</div>
+      <h2>Four tracks that grow Mira's <em>output, reach, direction, and identity.</em></h2>
+      <p class="lead" style="margin: 0 auto;">
+        Parallel to the level progression. Each track is a different axis Mira keeps expanding on, all on the same MIP substrate.
+      </p>
+    </div>
+
+    <div class="tracks">
+      <div class="track a">
+        <div class="letter">TRACK A</div>
+        <h3>High-fidelity interfaces</h3>
+        <p>Beyond dashboards: marketing sites, onboarding, full design-grade interfaces in a single conversation. Token-efficiency advantage <em style="color: var(--cyan); font-style: normal;">compounds</em> as the interface gets richer.</p>
+      </div>
+      <div class="track b">
+        <div class="letter">TRACK B</div>
+        <h3>Expanded apps ecosystem</h3>
+        <p>Pre-wired integrations available the moment you sign in. The endpoint catalog grows; what Mira can build grows with it. Target: 50+ apps.</p>
+      </div>
+      <div class="track c">
+        <div class="letter">TRACK C</div>
+        <h3>Read + write — form-to-outcome</h3>
+        <p>Forms that submit to write endpoints, with the outcome rendered live in a neighboring widget. Two-way conversations with your data, in a single turn.</p>
+      </div>
+      <div class="track d">
+        <div class="letter">TRACK D</div>
+        <h3>Conversational design system</h3>
+        <p>Talk-to-restyle. Palette, typography, spacing, density, motion — adjustable by talking. The interface restyles in one turn, no widget re-emitted.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== RESEARCH ============================= -->
+<section id="research">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow">Looking further</div>
+      <h2>Brush strokes, <em>not pixels.</em></h2>
+      <p class="lead" style="margin: 0 auto;">
+        The compression idea works for more than dashboards. We're exploring it for image generation too.
+      </p>
+    </div>
+
+    <div class="quote-block">
+      <p>A 4K image is <strong style="color: var(--cyan);">8,294,400 pixels</strong>. To produce one, today's diffusion models compute and emit a color value for every single pixel — 8.3 million data points. A skilled painter renders the same scene in roughly <strong style="color: var(--magenta);">10,000 brush strokes</strong>. Each stroke isn't a number — it's a procedural token with curvature, pressure, multi-pigment color mix, and 3D impasto height.</p>
+      <p>The information-density gap is roughly <strong style="color: var(--fg);">~830×</strong>. Same compression thesis as MIP, applied to a different medium. Stroke models are to image generation what MIP is to dashboards.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== FINAL CTA ============================ -->
+<section id="cta">
+  <div class="container">
+    <div class="final-cta">
+      <div class="eyebrow" style="margin-bottom: 16px;">Where it lives</div>
+      <h2>The protocol is open. <em>The interface is yours.</em></h2>
+      <p class="lead" style="margin: 0 auto 28px;">
+        Run Mira on your own machine. Bring a cloud key (Anthropic, OpenAI, Gemini) or point her at a local open-source model in the 16–31B range (Qwen 2.5, Llama 3.1, DeepSeek, Mistral) for full privacy — not a single token leaves your computer.
+      </p>
+      <div class="cta-row" style="justify-content: center;">
+        <a class="btn btn-primary" href="https://github.com/borademircan/mip">Get the code →</a>
+        <a class="btn btn-ghost" href="https://github.com/borademircan/mip#run-it-locally">Run it locally</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============================== FOOTER =============================== -->
+<footer class="site">
+  <div class="inner">
+    <div>
+      <a href="#" class="brand" style="color: var(--fg); display: inline-flex; align-items: center; gap: 12px; margin-bottom: 16px; text-decoration: none;">
+        <svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true">
+          <defs>
+            <linearGradient id="lg3" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0" stop-color="#00f0ff"/>
+              <stop offset="1" stop-color="#ff2bd6"/>
+            </linearGradient>
+          </defs>
+          <polygon points="16,3 29,28 3,28" fill="none" stroke="url(#lg3)" stroke-width="1.6" stroke-linejoin="round"/>
+          <circle cx="16" cy="17" r="2.4" fill="url(#lg3)"/>
+          <circle cx="16" cy="3"  r="1.6" fill="#00f0ff"/>
+          <circle cx="29" cy="28" r="1.6" fill="#ff2bd6"/>
+          <circle cx="3"  cy="28" r="1.6" fill="#a855f7"/>
+        </svg>
+        <span class="wordmark" style="font-weight: 700; letter-spacing: 0.18em;">MIRA</span>
+      </a>
+      <p style="color: var(--muted); max-width: 40ch; font-size: 0.95rem;">
+        A new level of communication with AI — built on the open Model Interface Protocol.
+      </p>
+      <p class="colophon">
+        Built by <a href="https://github.com/borademircan">Bora Demircan</a>. The protocol is MIT-licensed and open to contributions.
+      </p>
+    </div>
+    <div>
+      <h4>Explore</h4>
+      <a href="https://github.com/borademircan/mip">GitHub — borademircan/mip</a>
+      <a href="https://github.com/borademircan/mip/blob/main/docs/mip-roadmap.md">Roadmap</a>
+      <a href="https://github.com/borademircan/mip/blob/main/docs/mip-mvp-srs.md">SRS</a>
+      <a href="https://github.com/borademircan/mip/blob/main/docs/architecture-decisions.md">Architecture decisions</a>
+      <a href="https://github.com/borademircan/mip#run-it-locally">Run it locally</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
