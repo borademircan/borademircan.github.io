@@ -13,7 +13,7 @@
 <meta property="og:description" content="A new level of communication with AI. Three-participant feedback loop: you, the model, the canvas. Built on the open Model Interface Protocol." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://borademircan.com/mira" />
-<meta property="og:image" content="https://borademircan.com/mira/assets/mira-visualize.jpg" />
+<meta property="og:image" content="https://borademircan.com/mira/assets/mira-full-width-dashboard.jpg" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Mira — your interface mirror" />
 <meta name="twitter:description" content="A new level of communication with AI — built on the open Model Interface Protocol." />
@@ -296,6 +296,26 @@
     z-index: -1;
     pointer-events: none;
   }
+
+  /* Hero: single big desktop mockup variant */
+  .hero-shots-single {
+    margin-top: 80px;
+    position: relative;
+  }
+  .hero-shots-single::before {
+    content: "";
+    position: absolute;
+    inset: -80px -40px;
+    background:
+      radial-gradient(70% 50% at 50% 50%, rgba(0, 240, 255, 0.10), transparent 70%),
+      radial-gradient(50% 40% at 50% 60%, rgba(255, 43, 214, 0.06), transparent 70%);
+    z-index: -1;
+    pointer-events: none;
+  }
+  .hero-shots-single .mockup-caption {
+    margin-top: 28px;
+    font-size: 0.95rem;
+  }
   .shot {
     position: relative;
     border-radius: var(--radius);
@@ -333,6 +353,176 @@
     .hero { padding: 130px 0 32px; }
     .hero-shots { grid-template-columns: 1fr; }
   }
+
+  /* === Device mockups =================================================
+   * Three flavors — `.mockup--desktop` (browser chrome + stand),
+   * `.mockup--laptop` (smaller bezel + hinge wedge), `.mockup--tablet`
+   * (thin bezel, no chrome, soft glow). All render in pure CSS over a
+   * single <img>; share the same .mockup base for spacing + shadow.
+   */
+  .mockup {
+    position: relative;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #1c2030, #0d0f18);
+    border: 1px solid rgba(255,255,255,0.09);
+    box-shadow:
+      0 40px 80px -20px rgba(0,0,0,0.65),
+      0 0 0 1px rgba(255,255,255,0.03),
+      0 0 60px rgba(0, 240, 255, 0.06);
+    overflow: visible;
+  }
+  .mockup__frame {
+    position: relative;
+    padding: 10px;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .mockup__chrome {
+    height: 30px;
+    border-radius: 8px 8px 0 0;
+    background: #0e1119;
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .mockup__chrome::before {
+    content: "";
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    background: #ff5f57;
+    box-shadow:
+      18px 0 0 #febc2e,
+      36px 0 0 #28c840;
+  }
+  .mockup__chrome-url {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: 38%;
+    max-width: 280px;
+    height: 18px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 5px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.62rem;
+    color: var(--dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.02em;
+  }
+  @media (max-width: 600px) { .mockup__chrome-url { max-width: 180px; font-size: 0.55rem; } }
+
+  .mockup__screen {
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+    background: #0a0c14;
+    position: relative;
+    line-height: 0;  /* kill the 4px gap under img */
+  }
+  .mockup__screen img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  /* subtle screen glare */
+  .mockup__screen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(105deg, rgba(255,255,255,0.045) 0%, transparent 35%, transparent 65%, rgba(0,0,0,0.18) 100%);
+  }
+
+  /* Desktop monitor — adds a thin stand below */
+  .mockup--desktop { box-shadow: 0 50px 120px -30px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.04), 0 0 90px rgba(0, 240, 255, 0.10), 0 0 160px rgba(255, 43, 214, 0.06); }
+  .mockup--desktop .mockup__stand {
+    width: 110px;
+    height: 8px;
+    background: linear-gradient(180deg, #1c2030, #0d0f18);
+    margin: 0 auto;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .mockup--desktop .mockup__base {
+    width: 220px;
+    height: 6px;
+    background: linear-gradient(180deg, #2a2e3d, #1c2030);
+    margin: 0 auto;
+    border-radius: 999px;
+    margin-top: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  }
+
+  /* Laptop — wedge "keyboard" hint under the screen */
+  .mockup--laptop { border-radius: 10px; }
+  .mockup--laptop .mockup__frame { padding: 8px; border-radius: 10px; }
+  .mockup--laptop .mockup__chrome { height: 24px; padding: 0 10px; }
+  .mockup--laptop .mockup__chrome::before { width: 9px; height: 9px; box-shadow: 15px 0 0 #febc2e, 30px 0 0 #28c840; }
+  .mockup--laptop .mockup__hinge {
+    width: calc(100% + 24px);
+    margin-left: -12px;
+    height: 10px;
+    background: linear-gradient(180deg, #1c2030, #11141e 40%, #0d0f18);
+    border-radius: 0 0 14px 14px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+    position: relative;
+  }
+  .mockup--laptop .mockup__hinge::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 60px; height: 3px;
+    background: #06070b;
+    border-radius: 0 0 4px 4px;
+  }
+
+  /* Tablet — thin bezel, no chrome bar, slight magenta glow */
+  .mockup--tablet {
+    border-radius: 24px;
+    background: linear-gradient(180deg, #1f2330, #0d0f18);
+    box-shadow:
+      0 40px 80px -20px rgba(0,0,0,0.65),
+      0 0 0 1px rgba(255,255,255,0.05),
+      0 0 80px rgba(168, 85, 247, 0.10);
+  }
+  .mockup--tablet .mockup__frame { padding: 14px; border-radius: 24px; }
+  .mockup--tablet .mockup__screen { border-radius: 8px; }
+  .mockup--tablet .mockup__notch {
+    position: absolute;
+    top: 6px; left: 50%;
+    transform: translateX(-50%);
+    width: 48px; height: 3px;
+    background: rgba(255,255,255,0.10);
+    border-radius: 999px;
+  }
+
+  /* Mockup caption (sits below any frame) */
+  .mockup-caption {
+    margin-top: 18px;
+    text-align: center;
+    font-size: 0.88rem;
+    color: var(--muted);
+    max-width: 60ch;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.5;
+  }
+  .mockup-caption strong { color: var(--fg); font-weight: 600; }
+
+  /* Two-up grid for paired laptop frames */
+  .mockup-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 56px;
+  }
+  @media (max-width: 880px) { .mockup-pair { grid-template-columns: 1fr; gap: 36px; } }
+  .mockup-pair .mockup-caption { margin-top: 14px; font-size: 0.84rem; }
 
   /* === Section header pattern =========================================*/
   .section-head { max-width: 760px; margin: 0 auto 56px; text-align: center; }
@@ -982,21 +1172,22 @@
       <a class="btn btn-ghost" href="#story">Read the story</a>
     </div>
 
-    <div class="hero-shots">
-      <div>
-        <div class="shot">
-          <span class="label">visualize</span>
-          <img src="assets/mira-visualize.jpg" alt="Mira visualizes — building a dashboard widget by widget from MIP tool calls" loading="eager" />
+    <div class="hero-shots-single">
+      <div class="mockup mockup--desktop">
+        <div class="mockup__frame">
+          <div class="mockup__chrome">
+            <div class="mockup__chrome-url">borademircan.com/mira · live</div>
+          </div>
+          <div class="mockup__screen">
+            <img src="assets/mira-full-width-dashboard.jpg" alt="A full-width Mira dashboard, built end-to-end through a single conversation" loading="eager" />
+          </div>
         </div>
-        <div class="shot-caption">Mira <strong>visualizes</strong> in the canvas — building the interface widget by widget.</div>
       </div>
-      <div>
-        <div class="shot">
-          <span class="label magenta">explain</span>
-          <img src="assets/mira-explain.jpg" alt="Mira explains — narrating the data in plain language" loading="eager" />
-        </div>
-        <div class="shot-caption">Mira <strong>explains</strong> in the chat — narrating the data, same conversation turn.</div>
-      </div>
+      <div class="mockup__stand"></div>
+      <div class="mockup__base"></div>
+      <p class="mockup-caption">
+        A full Mira dashboard, <strong>built end-to-end in a single conversation</strong> — widgets, charts, tables, KPIs, all bound to live data. One chat turn, every layer of the interface.
+      </p>
     </div>
   </div>
 </section>
@@ -1089,6 +1280,39 @@
         <p style="margin-top: 8px; color: var(--fg); font-size: 0.98rem;">
           And then the loop closes. Because the canvas just showed you something you didn't know, <strong style="color: var(--cyan);">your next prompt is better</strong> — sharper, more specific, deeper. The conversation doesn't drift; it <em style="color: var(--magenta); font-style: normal;">converges into a scaffold of ideas</em> — a sharper map of your own blind spots and a bigger, better picture of whatever you're working through. The interface is the artifact; the real output is <strong style="color: var(--fg);">understanding</strong>.
         </p>
+      </div>
+    </div>
+
+    <!-- Two laptop mockups showing the two columns in action -->
+    <div class="mockup-pair">
+      <div>
+        <div class="mockup mockup--laptop">
+          <div class="mockup__frame">
+            <div class="mockup__chrome">
+              <div class="mockup__chrome-url">canvas · live</div>
+            </div>
+            <div class="mockup__screen">
+              <img src="assets/mira-visualize.jpg" alt="Mira visualizes — building a dashboard widget by widget" loading="lazy" />
+            </div>
+          </div>
+        </div>
+        <div class="mockup__hinge"></div>
+        <p class="mockup-caption">Mira <strong style="color: var(--cyan);">visualizes</strong> in the canvas — widgets, charts, tables landing one tool call at a time.</p>
+      </div>
+
+      <div>
+        <div class="mockup mockup--laptop">
+          <div class="mockup__frame">
+            <div class="mockup__chrome">
+              <div class="mockup__chrome-url">chat · explanation</div>
+            </div>
+            <div class="mockup__screen">
+              <img src="assets/mira-explain.jpg" alt="Mira explains — narrating the data in plain language" loading="lazy" />
+            </div>
+          </div>
+        </div>
+        <div class="mockup__hinge"></div>
+        <p class="mockup-caption">Mira <strong style="color: var(--magenta);">explains</strong> in the chat — narrating the same data in plain language, same conversation turn.</p>
       </div>
     </div>
   </div>
@@ -1241,6 +1465,21 @@
         <p>Talk-to-restyle. Palette, typography, spacing, density, motion — adjustable by talking. The interface restyles in one turn, no widget re-emitted.</p>
       </div>
     </div>
+
+    <!-- Templates picker — tablet mockup -->
+    <div style="max-width: 720px; margin: 64px auto 0;">
+      <div class="mockup mockup--tablet">
+        <div class="mockup__notch"></div>
+        <div class="mockup__frame">
+          <div class="mockup__screen">
+            <img src="assets/mira-templates.jpg" alt="The Templates browser — start from a category or describe what you want" loading="lazy" />
+          </div>
+        </div>
+      </div>
+      <p class="mockup-caption">
+        Templates browser — start from a curated category (marketing, sales, ops, finance) or just describe what you want and let Mira compose it. <strong>Track B</strong> grows this catalog into a wide pre-wired library; today you can already paste a Postman collection or OpenAPI spec to bootstrap a connection.
+      </p>
+    </div>
   </div>
 </section>
 
@@ -1345,6 +1584,24 @@
         <li>The <strong>MIP protocol itself is MIT</strong>. Fork it, embed it in your own product, ship a competing runtime — all of that's intended.</li>
       </ul>
     </details>
+
+    <!-- Connections page screenshot — laptop mockup -->
+    <div style="max-width: 880px; margin: 56px auto 0;">
+      <div class="mockup mockup--laptop">
+        <div class="mockup__frame">
+          <div class="mockup__chrome">
+            <div class="mockup__chrome-url">settings · connections</div>
+          </div>
+          <div class="mockup__screen">
+            <img src="assets/mira-connections.jpg" alt="The Connections page — one place to wire every tool your org uses" loading="lazy" />
+          </div>
+        </div>
+      </div>
+      <div class="mockup__hinge"></div>
+      <p class="mockup-caption">
+        The <strong style="color: var(--lime);">Connections</strong> page — one chat surface, every tool your org uses. Cloud LLMs, local runtimes, REST APIs, internal data warehouses. Per-source enable/disable for the assistant, encrypted key overrides, OpenAI-compatible endpoints.
+      </p>
+    </div>
   </div>
 </section>
 
