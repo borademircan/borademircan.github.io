@@ -55,17 +55,43 @@ command -v git  >/dev/null || die "git is required."
 command -v node >/dev/null || die "Node.js (>= 20) is required. https://nodejs.org"
 NODE_MAJOR=$(node -p "process.versions.node.split('.')[0]")
 [ "$NODE_MAJOR" -ge 18 ] || die "Node.js >= 20 required (you have v$(node --version))."
+command -v npm >/dev/null || die "npm is required (ships with Node.js)."
 
-if ! command -v pnpm >/dev/null; then
-  warn "pnpm not found — installing via corepack (npm fallback)"
-  if command -v corepack >/dev/null; then
-    corepack enable >/dev/null 2>&1
-    corepack prepare pnpm@latest --activate >/dev/null 2>&1
-  else
-    npm install -g pnpm >/dev/null
+# pnpm bootstrap: try corepack, validate it actually works, fall back to
+# `npm i -g pnpm`. Some Node 20.x builds have a broken corepack shim
+# (ERR_VM_DYNAMIC_IMPORT_CALLBACK_MISSING) which silently returns an empty
+# version string — we detect that and fix it.
+ensure_pnpm() {
+  if command -v pnpm >/dev/null && pnpm --version >/dev/null 2>&1; then
+    PNPM_VERSION=$(pnpm --version 2>/dev/null)
+    [ -n "$PNPM_VERSION" ] && return 0
   fi
-fi
-ok "git, node $(node --version), pnpm $(pnpm --version)"
+  warn "pnpm not found (or broken on this Node) — installing…"
+
+  # try corepack first
+  if command -v corepack >/dev/null; then
+    corepack enable >/dev/null 2>&1 || true
+    corepack prepare pnpm@latest --activate >/dev/null 2>&1 || true
+  fi
+
+  # validate corepack-installed pnpm actually runs
+  if command -v pnpm >/dev/null && pnpm --version >/dev/null 2>&1; then
+    PNPM_VERSION=$(pnpm --version 2>/dev/null)
+    [ -n "$PNPM_VERSION" ] && return 0
+  fi
+
+  # corepack shim is broken (known bug on some Node 20.x) — bypass it
+  warn "corepack pnpm shim isn't working — switching to npm-installed pnpm"
+  rm -rf "${HOME:-/root}/.cache/node/corepack" 2>/dev/null || true
+  hash -r 2>/dev/null || true
+  npm install -g pnpm >/dev/null 2>&1 || die "npm i -g pnpm failed. Install pnpm manually: https://pnpm.io/installation"
+
+  PNPM_VERSION=$(pnpm --version 2>/dev/null || true)
+  [ -n "$PNPM_VERSION" ] || die "pnpm is installed but '$(command -v pnpm) --version' fails. Try: rm -rf ~/.cache/node/corepack && npm i -g pnpm"
+  return 0
+}
+ensure_pnpm
+ok "git, node $(node --version), pnpm $PNPM_VERSION"
 
 # ── pick install target (current dir if possible, else ./mira) ───────
 TARGET="$PWD"
@@ -110,7 +136,12 @@ ok "cloned $REPO"
 
 # ── install deps ─────────────────────────────────────────────────────
 say "→ Installing workspace dependencies (this can take a minute)…"
-pnpm install --silent
+if ! pnpm install --reporter=append-only 2>&1; then
+  die "pnpm install failed. See the output above for the error. Common fixes:
+    · delete node_modules and retry: rm -rf node_modules && pnpm install
+    · Node version too old: node --version (need >= 20)
+    · permission issue: don't run as root if you're in your own home dir"
+fi
 ok "dependencies installed"
 
 # ── interactive setup ────────────────────────────────────────────────
