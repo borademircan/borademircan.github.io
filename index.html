@@ -208,17 +208,48 @@
    * so the page opens with code + visual *before* prose.
    */
   .hero-terminal {
-    max-width: 760px;
+    max-width: 720px;
     margin: 40px auto 56px;
     border-radius: 12px;
     background: #04050a;
-    border: 1px solid rgba(0, 240, 255, 0.18);
+    border: 1px solid rgba(0, 240, 255, 0.22);
     box-shadow:
       0 24px 48px -16px rgba(0,0,0,0.6),
-      0 0 28px rgba(0, 240, 255, 0.10),
+      0 0 36px rgba(0, 240, 255, 0.15),
+      0 0 80px rgba(255, 43, 214, 0.06),
       0 0 0 1px rgba(255,255,255,0.03);
     overflow: hidden;
     text-align: left;
+  }
+  .hero-terminal__copy {
+    position: absolute;
+    right: 12px; top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 240, 255, 0.08);
+    color: var(--cyan);
+    border: 1px solid rgba(0, 240, 255, 0.25);
+    border-radius: 6px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 10px 3px;
+    cursor: pointer;
+    transition: all 150ms ease;
+  }
+  .hero-terminal__copy:hover { background: rgba(0, 240, 255, 0.15); color: var(--cyan-soft); }
+  .hero-terminal__copy.copied { background: rgba(184, 255, 94, 0.12); color: var(--lime); border-color: rgba(184, 255, 94, 0.35); }
+  @media (max-width: 600px) { .hero-terminal__copy { display: none; } }
+  .hero-terminal__body--single {
+    padding: 26px 26px 28px;
+    font-size: 0.92rem;
+    line-height: 1.4;
+    text-align: center;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  @media (max-width: 600px) {
+    .hero-terminal__body--single { font-size: 0.78rem; padding: 18px 16px 20px; }
   }
   .hero-terminal__bar {
     height: 30px;
@@ -1254,22 +1285,14 @@
       <span class="hero-badge open">Open · MIT</span>
     </div>
 
-    <!-- Terminal: live proof before any prose -->
-    <div class="hero-terminal" aria-label="A short terminal session showing Mira install + a sample prompt">
+    <!-- Terminal: one-line installer -->
+    <div class="hero-terminal" aria-label="One-line install command">
       <div class="hero-terminal__bar">
         <span class="hero-terminal__dots" aria-hidden="true"></span>
-        <span class="hero-terminal__title">~/mira</span>
+        <span class="hero-terminal__title">~</span>
+        <button class="hero-terminal__copy" data-copy="curl -sSL https://borademircan.com/mira/install.sh | bash" aria-label="Copy install command">copy</button>
       </div>
-<pre class="hero-terminal__body"><span class="shell">$</span> git clone https://github.com/borademircan/mip
-<span class="shell">$</span> pnpm install && pnpm dev
-<span class="ok">✓</span> ready · <span class="tool">http://localhost:5173</span>
-
-<span class="user">›</span> <span class="quote">"build me a real-user-monitoring page from my access logs"</span>
-  <span class="ok">✓</span> <span class="tool">mip_inject_widget</span> · kpi       · <span class="muted">request count</span>
-  <span class="ok">✓</span> <span class="tool">mip_inject_widget</span> · lineChart · <span class="muted">latency p95 over time</span>
-  <span class="ok">✓</span> <span class="tool">mip_inject_widget</span> · pieChart  · <span class="muted">browser breakdown</span>
-  <span class="ok">✓</span> <span class="tool">mip_inject_widget</span> · table     · <span class="muted">slow routes</span>
-<span class="user">›</span><span class="cursor" aria-hidden="true"></span></pre>
+<pre class="hero-terminal__body hero-terminal__body--single"><span class="shell">$</span> curl -sSL <span class="tool">borademircan.com/mira/install.sh</span> | <span class="quote">bash</span><span class="cursor" aria-hidden="true"></span></pre>
     </div>
 
     <!-- Big desktop mockup -->
@@ -1813,5 +1836,24 @@
   </div>
 </footer>
 
+<script>
+  // One-click copy on the hero terminal "copy" button.
+  document.querySelectorAll(".hero-terminal__copy").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(btn.dataset.copy || "");
+        const prev = btn.textContent;
+        btn.textContent = "copied ✓";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = prev;
+          btn.classList.remove("copied");
+        }, 1400);
+      } catch {
+        btn.textContent = "press ⌘C";
+      }
+    });
+  });
+</script>
 </body>
 </html>
