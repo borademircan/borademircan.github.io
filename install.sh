@@ -331,6 +331,67 @@ NODESCRIPT
 
 ok "config written"
 
+# ── Postgres: detect, provision if reachable, hint if not ─────────────
+# Mira keeps runtime state (dashboards, AI conversations, app catalogs,
+# connections) in Postgres. If it's running we run migrations + seed now
+# so the choices the user just made (name, palette, AI provider) land in
+# the DB. If not, we print a clear hint and let them continue — the
+# frontend gracefully falls back to localStorage.
+say "→ Checking Postgres…"
+PG_READY=0
+if command -v pg_isready >/dev/null 2>&1; then
+  pg_isready -h 127.0.0.1 -p 5432 -q && PG_READY=1
+fi
+if [ "$PG_READY" -eq 0 ] && (echo > /dev/tcp/127.0.0.1/5432) 2>/dev/null; then
+  PG_READY=1
+fi
+
+if [ "$PG_READY" -eq 1 ]; then
+  ok "Postgres reachable on :5432"
+
+  # Make sure .env exists so @mip/db reads DATABASE_URL correctly.
+  if [ ! -f .env ] && [ -f .env.example ]; then
+    cp .env.example .env
+    ok ".env created from .env.example"
+  fi
+
+  # createdb is idempotent-ish (errors if it already exists, that's fine).
+  if command -v createdb >/dev/null 2>&1; then
+    createdb mip 2>/dev/null && ok "createdb mip" || ok "mip database already exists"
+  else
+    warn "createdb not on PATH — skipping. Run manually if migrations fail: createdb mip"
+  fi
+
+  say "→ Running migrations + seeding data/ into Postgres (this can take ~30s)…"
+  if pnpm db:migrate >/dev/null 2>&1; then
+    ok "schema migrated"
+    if pnpm db:seed >/dev/null 2>&1; then
+      ok "data/ seeded into Postgres — your choices are persisted"
+    else
+      warn "pnpm db:seed failed — chat sessions still work via localStorage. Re-run with: pnpm db:seed"
+    fi
+  else
+    warn "pnpm db:migrate failed — chat sessions will work via localStorage only"
+    warn "Re-run by hand: pnpm db:migrate && pnpm db:seed"
+  fi
+else
+  warn "Postgres is NOT running on :5432"
+  printf "\n"
+  printf "  %sMira works without Postgres%s — chat sessions and connections will save to\n" "$C_BOLD" "$C_RESET"
+  printf "  your browser's localStorage. For server-side persistence (cross-device,\n"
+  printf "  cross-browser, durable), install Postgres now:\n\n"
+  printf "    %s# macOS — Homebrew (recommended)%s\n" "$C_DIM" "$C_RESET"
+  printf "    %sbrew install postgresql@16 && brew services start postgresql@16%s\n\n" "$C_CYAN" "$C_RESET"
+  printf "    %s# Linux / WSL%s\n" "$C_DIM" "$C_RESET"
+  printf "    %ssudo apt install postgresql-16 && sudo systemctl enable --now postgresql%s\n\n" "$C_CYAN" "$C_RESET"
+  printf "    %s# Anywhere — Docker%s\n" "$C_DIM" "$C_RESET"
+  printf "    %sdocker run --name mip-pg -e POSTGRES_HOST_AUTH_METHOD=trust -p 5432:5432 -d postgres:16%s\n\n" "$C_CYAN" "$C_RESET"
+  printf "  Then, back in this directory:\n\n"
+  printf "    %screatedb mip && pnpm db:migrate && pnpm db:seed%s\n\n" "$C_CYAN" "$C_RESET"
+  printf "  The dev servers will start in a moment with localStorage fallback in the meantime.\n"
+  printf "\n"
+fi
+
 # ── start the dev servers in the background ──────────────────────────
 say "→ Starting Mira on http://localhost:5173 …"
 
@@ -373,6 +434,11 @@ printf "\n"
 printf "  %sBrand:%s        %s · %s\n" "$C_DIM" "$C_RESET" "$USER_NAME" "$USER_EMAIL"
 printf "  %sPalette:%s      %s · primary %s\n" "$C_DIM" "$C_RESET" "$PAL_NAME" "$PAL_PRIMARY"
 printf "  %sAI provider:%s  %s · %s\n" "$C_DIM" "$C_RESET" "$APP_NAME" "$AI_MODEL"
+if [ "$PG_READY" -eq 1 ]; then
+  printf "  %sPersistence:%s  Postgres on :5432 (durable, cross-device)\n" "$C_DIM" "$C_RESET"
+else
+  printf "  %sPersistence:%s  browser localStorage only — install Postgres for server-side sync\n" "$C_DIM" "$C_RESET"
+fi
 printf "\n"
 printf "  %sDocs · roadmap · architecture:%s  %shttps://github.com/borademircan/mip%s\n" "$C_DIM" "$C_RESET" "$C_MAG" "$C_RESET"
 printf "  %sLanding · positioning · pitch:%s  %shttps://miraworld.net%s\n" "$C_DIM" "$C_RESET" "$C_MAG" "$C_RESET"
